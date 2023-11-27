@@ -126,10 +126,10 @@ function searching(attr, options, maxAttempts = 6) {
   }
 }
 
-const searchingXpath = (xpathSelector, cypress) => {
+const searchingXpath = (xpathSelector) => {
   let nodes = [];
 
-  cypress.then(() => {
+  cy.then(() => {
     const log = {
       name: "xpath",
       message: xpathSelector,
