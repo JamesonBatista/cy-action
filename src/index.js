@@ -1,4 +1,3 @@
-let cypress;
 export function action(
   { attr = "", text = "action page description" },
   options = {}
@@ -28,14 +27,14 @@ export function action(
       if (forTag.length > 0) {
         return cypress.get(forTag, options).wait(1000, { log: false });
       } else {
-        return searching(tags[1], cypress);
+        return searching(tags[1], options);
       }
     } else if (attr.includes(">")) {
       const cssSelector = doc.querySelectorAll(attr);
       if (cssSelector.length > 0) {
         return cypress.get(attr, options).wait(1000, { log: false });
       } else {
-        return searching(attr, cypress);
+        return searching(attr, options);
       }
     } else if (regex && attr.startsWith("/ht")) {
       return fullPage(attr).then((el) => {
@@ -74,7 +73,7 @@ export function action(
     });
   }
 }
-function searching(attr, maxAttempts = 6) {
+function searching(attr, options, maxAttempts = 6) {
   const attempts = (attempt = 1) => {
     cy.document({ log: false }).then((doc) => {
       const waitAttempts =
