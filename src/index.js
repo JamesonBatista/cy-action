@@ -74,7 +74,7 @@ export function action(
     });
   }
 }
-function searching(attr, maxAttempts = 6) {
+function searching(attr, cypress, maxAttempts = 6) {
   const attempts = (attempt = 1) => {
     cy.document({ log: false }).then((doc) => {
       const waitAttempts =
