@@ -1,0 +1,36 @@
+{
+  "name": "cy-action",
+  "version": "1.0.0",
+  "description": "cy.action is a project that aims to have a new framework to make cy.get easier, but this time you will be able to use it by attribute, tag, xpath, fullXpath and cssSelector",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/JamesonBatista/cy-action.git"
+  },
+  "keywords": [
+    "cypress",
+    "cypress-io",
+    "xpath",
+    "action",
+    "cy.action"
+  ],
+  "files": [
+    "src"
+  ],
+  "types": "src",
+  "author": "Jam Batista QA Specialist <batistadado@gmail.com>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/JamesonBatista/cy-action/issues"
+  },
+  "homepage": "https://github.com/JamesonBatista/cy-action#readme",
+  "publishConfig": {
+    "access": "public"
+  },
+  "dependencies": {
+    "cypress": "^13.6.0"
+  }
+}
