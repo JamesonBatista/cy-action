@@ -1,10 +1,12 @@
-export function action(
-  { attr = "", text = "action page description" },
-  options = {}
-) {
+export function action({ attr = "", text = null }, options = {}) {
   let regex = /^[!@#$%¨&*()_+{}[\]:;,.?~\\\/|]/.test(attr);
   return cy.document({ log: false }).then((doc) => {
-    let cypress = cy.step(text);
+    let cypress;
+    if (text) {
+      cypress = cy.step(text);
+    } else {
+      cypress = cy;
+    }
     if (typeof attr === "object") {
       return cypress.get(attr, options).wait(1000, { log: false });
     }

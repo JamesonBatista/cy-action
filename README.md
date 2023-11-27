@@ -26,11 +26,18 @@ require("cypress-action");
 
 ![[config]](src/e2e.png)
 
-![[cy-action]](src/image.png)(https://youtu.be/fl0olsqrz6U)
-
 ## Uso
 
 The `cy.action` command can be used in your Cypress tests as follows:
+
+#### `text` in cy.action
+
+    in cy.action the text parameter is not mandatory, but using it will help indicate the action, and use the visuals of your test
+
+```javascript
+// Example of using the `action` command
+cy.action({ attr: "my-selector" }).click(); // Options passed as second argument
+```
 
 ```javascript
 // Example of using the `action` command
@@ -83,6 +90,8 @@ cy.action({
   text: "Selecting button via XPath",
 }).type();
 ```
+
+![[cy-action]](src/image.png)(https://youtu.be/fl0olsqrz6U)
 
 ## Contributions
 
