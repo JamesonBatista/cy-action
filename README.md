@@ -91,7 +91,50 @@ cy.action({
 }).type();
 ```
 
-![[cy-action]](src/image.png)(https://youtu.be/fl0olsqrz6U)
+```javascript
+cy.action({ attr: "<form>", text: "action mapeando caminho" })
+  .find(".field")
+  .find('[placeholder="Nome completo"]')
+  .clear()
+  .type("Teste buscando por camadas usando tags");
+```
+
+```javascript
+// attachFile
+cy.action({ attr: 'type="file"', text: "attachFile include" }).attachFile(
+  "image.png"
+);
+```
+
+```javascript
+// cssSelector
+cy.action({
+  attr: "#page-walker > form > fieldset:nth-child(3) > div:nth-child(2) > div > input[type=text]",
+  text: "action por selector",
+})
+  .clear()
+  .type("Teste com selector");
+```
+
+```javascript
+// action not text
+cy.action({ attr: 'name="name"' }).clear().type("Teste sem texto de ação");
+```
+
+```javascript
+// attribute
+cy.action({ attr: 'name="name"', text: "action por atributo" }).type(
+  "Teste com atributo"
+);
+our
+cy.action({ attr: 'placeholder="Nome completo"', text: "action por atributo" }).type(
+  "Teste com atributo"
+);
+
+<input type="text" name="name" placeholder="Nome completo">
+```
+
+![[cy-action]](src/image.png)
 
 ## Contributions
 
