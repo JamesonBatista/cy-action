@@ -1,4 +1,7 @@
-function action({ attr = "", text = "action page description" }, options = {}) {
+export function action(
+  { attr = "", text = "action page description" },
+  options = {}
+) {
   let cypress;
   let regex = /^[!@#$%¨&*()_+{}[\]:;,.?~\\\/|]/.test(attr);
   return cy.document({ log: false }).then((doc) => {
