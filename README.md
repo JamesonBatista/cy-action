@@ -1,89 +1,93 @@
 # Cypress Action Command
 
-Este pacote fornece um comando personalizado `action` para o Cypress, permitindo a realização de diversas ações em elementos do DOM com base em seletores específicos e opções de customização.
+This package provides a custom `action` command for Cypress, allowing you to perform various actions on DOM elements based on specific selectors and customization options.
 
-## Características
+## Characteristics
 
-- Suporta seleção de elementos via atributos, tags, seletores CSS e XPath.
-- Permite a passagem de opções do Cypress, como `timeout`.
-- Oferece uma descrição personalizada para cada ação, melhorando a legibilidade dos logs de teste.
+- Supports element selection via attributes, tags, CSS and XPath selectors.
+- Allows passing of Cypress options such as `timeout`.
+- Provides a personalized description for each action, improving the readability of test logs.
 
-## Instalação
+## Installation
 
-Para instalar o pacote, execute o seguinte comando no seu projeto Cypress:
+To install the package, run the following command in your Cypress project:
 
 ```bash
-npm i cy-action
+npm i cypress-action
 ```
 
-## Configuração
+## Settings
 
-Após a instalação, você precisa importar e registrar o comando `action` no Cypress. Adicione o seguinte código no seu arquivo de comandos Cypress (geralmente `cypress/support/commands.js` ou `cypress/support/e2e.js`):
+After installation, you need to import and register the `action` command in Cypress. Add the following code to your Cypress commands file (usually `cypress/support/commands.js` or `cypress/support/e2e.js`):
 
 ```javascript
-require("cy-action");
+require("cypress-action");
 ```
+
+![[config]](src/e2e.png)
+
+![[cy-action]](src/image.png)(https://youtu.be/fl0olsqrz6U)
 
 ## Uso
 
-O comando `cy.action` pode ser usado em seus testes Cypress da seguinte maneira:
+The `cy.action` command can be used in your Cypress tests as follows:
 
 ```javascript
-// Exemplo de uso do comando `action`
+// Example of using the `action` command
 cy.action(
-  { attr: "meu-seletor", text: "Descrição da ação" },
+  { attr: "my-selector", text: "Action description" },
   { timeout: 10000 }
-).click(); // Opções passadas como segundo argumento
+).click(); // Options passed as second argument
 ```
 
-### Parâmetros
+### Parameters
 
-- `attr`: O seletor do elemento (string). Pode ser um atributo, tag, seletor CSS ou XPath.
-- `text`: Uma descrição da ação para ser exibida nos logs.
-- `options`: Opções adicionais do Cypress, como `timeout`.
+- `attr`: The element selector (string). It can be an attribute, tag, CSS or XPath selector.
+- `text`: A description of the action to be displayed in the logs.
+- `options`: Additional Cypress options, such as `timeout`.
 
-### Exemplos
+### Examples
 
-#### Selecionando por Atributo
+#### Selecting by Attribute
 
 ```javascript
 cy.action({
   attr: "data-test-id=botao-login",
-  text: "Clicando no botão de login",
+  text: "Clicking the login button",
 }).type();
 ```
 
-#### Selecionando por Tag
+#### Selecting by Tag
 
 ```javascript
 cy.action({
   attr: "<button>",
-  text: "Interagindo com botões",
+  text: "Interacting with buttons",
 }).click();
 ```
 
-#### Selecionando por Xpath
+#### Selecting by Xpath
 
 ```javascript
 cy.action({
   attr: '//*[@id="page-walker"]/form/fieldset[1]/div[2]/div/input',
-  text: "Interagindo com botões",
+  text: "Interacting with buttons",
 }).select();
 ```
 
-#### Selecionando por fullXPath
+#### Selecting by fullXPath
 
 ```javascript
 cy.action({
   attr: "/html/body/div/div/button",
-  text: "Selecionando botão via XPath",
+  text: "Selecting button via XPath",
 }).type();
 ```
 
-## Contribuições
+## Contributions
 
-Contribuições são sempre bem-vindas. Sinta-se à vontade para abrir issues ou enviar pull requests.
+Contributions are always welcome. Feel free to open issues or send pull requests.
 
-## Licença
+## License
 
-Este projeto está licenciado sob os termos da licença MIT.
+This project is licensed under the terms of the MIT License.
