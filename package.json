@@ -2,7 +2,7 @@
   "name": "cypre-action",
   "version": "1.0.0",
   "description": "cy.action is a project that aims to have a new framework to make cy.get easier, but this time you will be able to use it by attribute, tag, xpath, fullXpath and cssSelector",
-  "main": "index.js",
+  "main": "src",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
