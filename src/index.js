@@ -1,11 +1,11 @@
+let cypress;
 export function action(
   { attr = "", text = "action page description" },
   options = {}
 ) {
-  let cypress;
   let regex = /^[!@#$%¨&*()_+{}[\]:;,.?~\\\/|]/.test(attr);
   return cy.document({ log: false }).then((doc) => {
-    cypress = cy.step(text);
+    let cypress = cy.step(text);
     if (typeof attr === "object") {
       return cypress.get(attr, options).wait(1000, { log: false });
     }
@@ -54,11 +54,11 @@ export function action(
         if (el) {
           return cypress.get(el, options).wait(1000, { log: false });
         } else {
-          searching(attr, cypress);
+          searching(attr);
         }
       });
     } else {
-      return searchingXpath(attr, cypress);
+      return searchingXpath(attr);
     }
   });
 
@@ -74,7 +74,7 @@ export function action(
     });
   }
 }
-function searching(attr, cypress, maxAttempts = 6) {
+function searching(attr, maxAttempts = 6) {
   const attempts = (attempt = 1) => {
     cy.document({ log: false }).then((doc) => {
       const waitAttempts =
@@ -96,13 +96,13 @@ function searching(attr, cypress, maxAttempts = 6) {
           if (attr.startsWith("/ht")) {
             return fullPage(attr).then((el) => {
               if (el) {
-                return cypress.get(el, options).wait(1000, { log: false });
+                return cy.get(el, options).wait(1000, { log: false });
               }
             });
           } else {
             let selector = doc.querySelectorAll(attr);
             if (selector.length > 0) {
-              return cypress.get(selector, options).wait(1000, { log: false });
+              return cy.get(selector, options).wait(1000, { log: false });
             }
           }
 
