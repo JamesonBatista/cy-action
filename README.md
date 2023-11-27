@@ -24,7 +24,7 @@ After installation, you need to import and register the `action` command in Cypr
 require("cypress-action");
 ```
 
-![[config]](src/e2e.png)
+![[config]](src/e2e2.png)
 
 ## Uso
 
