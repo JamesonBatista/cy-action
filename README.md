@@ -1,5 +1,6 @@
 # Cypress Action Command
 
+![cypress](https://img.shields.io/badge/cy.action-1.0.0-brightgreen)
 ![cypress](https://img.shields.io/badge/cypress-13.0.6-brightgreen)
 ![xpath](https://img.shields.io/badge/xpath-2.0.1-green)
 ![generate-datafaker](https://img.shields.io/badge/datafaker-1.0.2-yellow)
@@ -41,7 +42,12 @@ export const faker = require("generate-datafaker");
 require("cypress-xpath");
 ```
 
-## Uso
+## Snippets
+
+> action <br>
+> actionIf
+
+## Use
 
 The `cy.action` command can be used in your Cypress tests as follows:
 
