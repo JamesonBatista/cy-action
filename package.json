@@ -1,10 +1,13 @@
 {
-  "name": "cypress-action",
+  "name": "9-action",
   "version": "1.0.0",
   "description": "cy.action is a project that aims to have a new framework to make cy.get easier, but this time you will be able to use it by attribute, tag, xpath, fullXpath and cssSelector",
   "main": "src",
+  "peerDependencies": {
+    "cypress": ">=10.0.0"
+  },
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "postinstall": "node script.js"
   },
   "repository": {
     "type": "git",
@@ -18,7 +21,8 @@
     "cy.action"
   ],
   "files": [
-    "src"
+    "src",
+    "script.js"
   ],
   "types": "src",
   "author": "Jam Batista QA Specialist <batistadado@gmail.com>",
@@ -31,8 +35,10 @@
     "access": "public"
   },
   "dependencies": {
-    "cypress": "^13.6.0",
     "cypress-file-upload": "^5.0.8",
-    "cypress-plugin-steps": "^1.1.1"
+    "cypress-plugin-steps": "^1.1.1",
+    "cypress-xpath": "^2.0.1",
+    "generate-datafaker": "^1.0.2",
+    "uuidv4": "^6.2.13"
   }
 }

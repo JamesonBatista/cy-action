@@ -18,5 +18,11 @@
     "prefix": "action",
     "body": ["cy.action({attr: '$1', text: ''})", "$2"],
     "description": "Generate new cy.action"
+  },
+  "Create generate-data faker": {
+    "scope": "javascript,typescript",
+    "prefix": "faker",
+    "body": ["export const faker = require(\"generate-datafaker\");", "$2"],
+    "description": "Generate data-faker"
   }
 }

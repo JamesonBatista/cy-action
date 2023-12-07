@@ -10,7 +10,7 @@ declare namespace Cypress {
      * cy.action({ attr: 'my-selector', text: 'Action description' }, { timeout: 10000 });
      */
     action(
-      options: { attr: string; text: string },
+      options: { attr: string; text: string; ifExist: boolean; wait: boolean },
       getOptions?: Partial<
         Cypress.Loggable &
           Cypress.Timeoutable &

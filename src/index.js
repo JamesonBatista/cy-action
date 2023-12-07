@@ -1,110 +1,119 @@
-export function action({ attr = "", text = null }, options = {}) {
+const applyStyles = require("./style.js");
+export function action(
+  { attr = "", text = null, ifExist = false, maxAttempts = 6 },
+  test,
+  options = {}
+) {
+  applyStyles();
   let regex = /^[!@#$%¨&*()_+{}[\]:;,.?~\\\/|]/.test(attr);
-  return cy.document({ log: false }).then((doc) => {
+  const search = (selector, test) => {
     let cypress;
     if (text) {
       cypress = cy.step(text);
     } else {
       cypress = cy;
     }
-    if (typeof attr === "object") {
-      return cypress.get(attr, options).wait(1000, { log: false });
-    }
-    if (!attr.startsWith("<") && !attr.endsWith(">") && !regex) {
-      let selector = doc.querySelectorAll(`[${attr}]`);
-      if (selector.length > 0) {
-        return cypress.get(selector, options).wait(1000, { log: false });
+    return cy.get("body", { log: false }).then(($body) => {
+      const doc = $body[0].ownerDocument;
+      const sel = elementRefactorySelector(selector, regex, doc);
+      const element = $body.find(sel);
+
+      if (element.length) {
+        elseIf(1, selector, element);
+        return test(cy.wrap(element));
       } else {
-        return searching(`[${attr}]`);
+        elseIf(0, selector, element);
+        return null;
       }
-    } else if (
-      attr.startsWith("<") &&
-      attr.endsWith(">") &&
-      !attr.startsWith("//") &&
-      !attr.startsWith("/") &&
-      !regex
-    ) {
-      const tags = attr.match(/<([^>]*)>/);
-      let forTag = doc.querySelectorAll(tags[1]);
-      if (forTag.length > 0) {
-        return cypress.get(forTag, options).wait(1000, { log: false });
-      } else {
-        return searching(tags[1], options);
-      }
-    } else if (attr.includes(">")) {
-      const cssSelector = doc.querySelectorAll(attr);
-      if (cssSelector.length > 0) {
-        return cypress.get(attr, options).wait(1000, { log: false });
-      } else {
-        return searching(attr, options);
-      }
-    } else if (regex && attr.startsWith("/ht")) {
-      return fullPage(attr).then((el) => {
-        const log = {
-          name: "fullXpath",
-          message: attr,
-          consoleProps: () => {
-            return {
-              XPath: attr,
-              "Results length": el.length,
-              Result: el,
-            };
-          },
-        };
-        Cypress.log(log);
-        if (el) {
-          return cypress.get(el, options).wait(1000, { log: false });
+    });
+  };
+
+  if (ifExist) {
+    if (attr.startsWith("//")) {
+      return searchingXpathifElse(attr).then((elements) => {
+        if (elements.length > 0) {
+          elseIf(1, attr, elements);
+          return test(cy.wrap(elements));
         } else {
-          searching(attr);
+          elseIf(0, attr, elements);
+          return cy.wrap(null, { log: false });
         }
       });
-    } else {
-      return searchingXpath(attr);
     }
-  });
 
-  function fullPage(xpath) {
-    return cy.document({ log: false }).then((document) => {
-      return document.evaluate(
-        xpath,
-        document,
-        null,
-        XPathResult.FIRST_ORDERED_NODE_TYPE,
-        null
-      ).singleNodeValue;
+    return search(attr, test);
+  } else {
+    return cy.document({ log: false }).then((doc) => {
+      let cypress;
+      if (text) {
+        cypress = cy.step(text);
+      } else {
+        cypress = cy;
+      }
+      if (typeof attr === "object") {
+        return cypress.get(attr, options).wait(1000, { log: false });
+      }
+
+      if (attr.startsWith("//")) {
+        return searchingXpath(attr);
+      }
+      const selector = elementRefactorySelector(attr, regex, doc);
+      if (typeof selector === "object") {
+        return cypress.get(selector, options).wait(1000, { log: false });
+      }
+
+      if (doc.querySelectorAll(selector).length > 0) {
+        console.log("a", selector);
+
+        return cypress.get(selector, options).wait(1000, { log: false });
+      } else {
+        return searching(selector, options, maxAttempts);
+      }
     });
   }
 }
-function searching(attr, options, maxAttempts = 6) {
+function elseIf(num, attr, elements) {
+  if (num > 0) {
+    const log = {
+      name: "cssSelector",
+      message: `✅  exist: element '${attr}' found`,
+      consoleProps: () => {
+        return {
+          XPath: attr,
+          "Results length": elements?.length,
+          Result: elements,
+        };
+      },
+    };
+    Cypress.log(log);
+  } else {
+    const log = {
+      name: "not-cssSelector",
+      message: `🔴  skipped: element '${attr}' not found`,
+      consoleProps: () => {
+        return {
+          XPath: attr,
+          "Results length": elements,
+          Result: elements,
+        };
+      },
+    };
+    Cypress.log(log);
+  }
+}
+
+function searching(attr, options, maxAttempts) {
+  const baseWaitTime = 3000; // 3000ms ou 3 segundos
   const attempts = (attempt = 1) => {
     cy.document({ log: false }).then((doc) => {
-      const waitAttempts =
-        attempt === 1
-          ? 3000
-          : attempt === 2
-          ? 5000
-          : attempt === 3
-          ? 10000
-          : attempt === 4
-          ? 20000
-          : attempt === 5
-          ? 30000
-          : 60000;
+      const waitTime = attempt * baseWaitTime;
 
-      cy.log(`🔍 searching *${attr}* in page, ${attempt} tentative...`)
-        .wait(waitAttempts)
+      cy.log(`🔍 searching *${attr}* in page, ${attempt}ª tentativa...`)
+        .wait(waitTime)
         .then(() => {
-          if (attr.startsWith("/ht")) {
-            return fullPage(attr).then((el) => {
-              if (el) {
-                return cy.get(el, options).wait(1000, { log: false });
-              }
-            });
-          } else {
-            let selector = doc.querySelectorAll(attr);
-            if (selector.length > 0) {
-              return cy.get(selector, options).wait(1000, { log: false });
-            }
+          let selector = doc.querySelectorAll(attr);
+          if (selector.length > 0) {
+            return cy.get(selector, options).wait(1000, { log: false });
           }
 
           if (attempt < maxAttempts) {
@@ -114,20 +123,7 @@ function searching(attr, options, maxAttempts = 6) {
     });
   };
   attempts();
-
-  function fullPage(xpath) {
-    return cy.document({ log: false }).then((document) => {
-      return document.evaluate(
-        xpath,
-        document,
-        null,
-        XPathResult.FIRST_ORDERED_NODE_TYPE,
-        null
-      ).singleNodeValue;
-    });
-  }
 }
-
 const searchingXpath = (xpathSelector) => {
   let nodes = [];
 
@@ -205,6 +201,73 @@ const searchingXpath = (xpathSelector) => {
     return executeSearch();
   });
 };
+const searchingXpathifElse = (xpathSelector) => {
+  return cy.document({ log: false }).then((doc) => {
+    return new Cypress.Promise((resolve) => {
+      let nodes = [];
+      let contextNode = doc;
+      let iterator = doc.evaluate(
+        xpathSelector,
+        contextNode,
+        null,
+        XPathResult.ORDERED_NODE_ITERATOR_TYPE,
+        null
+      );
+
+      let node = iterator.iterateNext();
+      while (node) {
+        nodes.push(node);
+        node = iterator.iterateNext();
+      }
+
+      if (nodes.length > 0) {
+        resolve(cy.wrap(nodes, { log: false }));
+      } else {
+        resolve(cy.wrap([], { log: false }));
+      }
+    });
+  });
+};
+
+function elementRefactorySelector(attr, regex, doc) {
+  let xSelector = null;
+
+  if (!doc || !doc.evaluate) {
+    doc = cy.state("window").document;
+  }
+
+  if (
+    !attr.startsWith("<") &&
+    !attr.endsWith(">") &&
+    !regex &&
+    !attr.startsWith("/ht")
+  ) {
+    xSelector = `[${attr}]`;
+  } else if (
+    attr.startsWith("<") &&
+    attr.endsWith(">") &&
+    !attr.startsWith("//") &&
+    !attr.startsWith("/") &&
+    !regex
+  ) {
+    const tags = attr.match(/<([^>]*)>/);
+    xSelector = tags[1];
+  } else if (attr.includes(">")) {
+    xSelector = attr;
+  } else if (attr.startsWith("/ht")) {
+    return doc.evaluate(
+      attr,
+      doc,
+      null,
+      XPathResult.FIRST_ORDERED_NODE_TYPE,
+      null
+    ).singleNodeValue;
+  } else {
+    return searchingXpathifElse(attr);
+  }
+
+  return xSelector;
+}
 Cypress.Commands.add("action", (options, getOptions) => {
   return action(options, getOptions);
 });

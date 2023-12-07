@@ -1,5 +1,15 @@
 # Cypress Action Command
 
+![cypress](https://img.shields.io/badge/cypress-13.0.6-brightgreen)
+![xpath](https://img.shields.io/badge/xpath-2.0.1-green)
+![generate-datafaker](https://img.shields.io/badge/datafaker-1.0.2-yellow)
+![fileUpload](https://img.shields.io/badge/fileUpload-5.0.8-blue)
+
+### Required
+
+| NodeJs
+| Cypress version 10 >
+
 This package provides a custom `action` command for Cypress, allowing you to perform various actions on DOM elements based on specific selectors and customization options.
 
 ## Characteristics
@@ -18,13 +28,18 @@ npm i cypress-action
 
 ## Settings
 
-After installation, you need to import and register the `action` command in Cypress. Add the following code to your Cypress commands file (usually `cypress/support/commands.js` or `cypress/support/e2e.js`):
-
 ```javascript
-require("cypress-action");
+
+cy.action automatically adds dependencies to the project in e2e.js file
 ```
 
-![[config]](src/e2e2.png)
+```javascript
+import "cypress-plugin-steps";
+require("cypress-action");
+import "cypress-file-upload";
+export const faker = require("generate-datafaker");
+require("cypress-xpath");
+```
 
 ## Uso
 
@@ -134,7 +149,114 @@ cy.action({ attr: 'placeholder="Nome completo"', text: "action por atributo" }).
 <input type="text" name="name" placeholder="Nome completo">
 ```
 
-![[cy-action]](src/image.png)
+```javascript
+action({ attr: 'name="name"', text: "attr" })
+    .clear()
+    .type(faker.generateName());
+
+    action({
+      attr: "#page-walker > form > fieldset:nth-child(3) > div:nth-child(2) > div > input[type=text]",
+      text: "cssSelector",
+    })
+      .clear()
+      .type(faker.generateName());
+
+    action({
+      attr: '//*[@id="page-walker"]/form/fieldset[1]/div[2]/div/input',
+      text: "xpath",
+    })
+      .clear()
+      .type(faker.generateName());
+
+    action({
+      attr: "/html/body/div/div/form/fieldset[2]/div[4]/div[2]/input",
+      text: "full xpath",
+    })
+      .clear()
+      .type(faker.generateName()),
+      { timeout: 2000 };
+  });
+```
+
+```javascript
+it("Tests ifElse", () => {
+  // atributo
+  action({ attr: 'name="name"', text: "attr", ifExist: true }, (el) =>
+    el.type(faker.generateName())
+  );
+  //
+  action({ attr: 'name="nam"', text: "attr not exist", ifExist: true }, (el) =>
+    el.type(faker.generateName())
+  );
+  // cssSelector
+  action(
+    {
+      attr: "#page-walker > form > fieldset:nth-child(3) > div:nth-child(3) > div:nth-child(1) > input[type=text]",
+      text: "css selector",
+      ifExist: true,
+    },
+    (el) => el.type(faker.generateEmails())
+  );
+  // cssSelector element not exist
+  action(
+    {
+      attr: "#page-walker > form > fieldset:nth-child(3) > div:nth-child(3) > div:nth-child(1) > input[type=text]",
+      text: "css selector not exist",
+      ifExist: true,
+    },
+    (el) => el.type(faker.generateEmails())
+  );
+  // xpath
+  action(
+    {
+      attr: '//*[@id="page-walker"]/form/fieldset[1]/div[3]/div[2]/input',
+      text: "xpath element ",
+      ifExist: true,
+    },
+    (el) => el.type(faker.generateCPF())
+  );
+  // xpath element not exist
+  action(
+    {
+      attr: '//*[@id="page-walker"]/form/fieldset[1]/div[3]/div[2]/inpu',
+      text: "xpath element not exist",
+      ifExist: true,
+    },
+    (el) => el.type(faker.generateCPF())
+  );
+  //fullxpath
+  action(
+    {
+      attr: "/html/body/div/div/form/fieldset[2]/div[4]/div[2]/input",
+      text: "fullxpath elemen",
+      ifExist: true,
+    },
+    (el) => el.type(faker.generateStreet())
+  );
+  //fullxpath not exist
+  action(
+    {
+      attr: "/html/body/div/div/form/fieldset[2]/div[4]/div[2]/inpu",
+      text: "fullxpath element not exist",
+      ifExist: true,
+    },
+    (el) => el.type(faker.generateStreet())
+  );
+
+  // with options cypress
+  action(
+    {
+      attr: "/html/body/div/div/form/fieldset[2]/div[4]/div[2]/inpu",
+      text: "fullxpath element not exist",
+      ifExist: true,
+    },
+    (el) => el.type(faker.generateStreet()),
+    { timeout: 2000 }
+  );
+});
+```
+
+## O cy.action integration generate-datafaker
 
 ## Contributions
 
