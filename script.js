@@ -32,6 +32,7 @@ require("cypress-action");
 import "cypress-file-upload";
 require('cypress-xpath');
 export const faker = require("generate-datafaker");
+import 'cypress-wait-until';
 `;
 
 const appendToFile = (filePath, content) => {

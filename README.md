@@ -1,7 +1,7 @@
 # Cypress Action Command
 
 ![cypress](https://img.shields.io/badge/cy.action-1.0.0-brightgreen)
-![cypress](https://img.shields.io/badge/cypress-13.0.6-brightgreen)
+![cypress](https://img.shields.io/badge/cypress-13.6.0-brightgreen)
 ![xpath](https://img.shields.io/badge/xpath-2.0.1-green)
 ![generate-datafaker](https://img.shields.io/badge/datafaker-1.0.2-yellow)
 ![fileUpload](https://img.shields.io/badge/fileUpload-5.0.8-blue)
@@ -38,8 +38,9 @@ cy.action automatically adds dependencies to the project in e2e.js file
 import "cypress-plugin-steps";
 require("cypress-action");
 import "cypress-file-upload";
-export const faker = require("generate-datafaker");
 require("cypress-xpath");
+export const faker = require("generate-datafaker");
+import "cypress-wait-until";
 ```
 
 ## Snippets
@@ -63,9 +64,12 @@ cy.action({ attr: "my-selector" }).click(); // Options passed as second argument
 ```javascript
 // Example of using the `action` command
 cy.action(
-  { attr: "my-selector", text: "Action description" },
-  { timeout: 10000 }
-).click(); // Options passed as second argument
+  { attr: 'name="nam"', text: "Action description", maxAttempts: 8 },
+  null,
+  {
+    timeout: 10000000,
+  }
+).type("olá"); // Options passed as second argument
 ```
 
 ### Parameters
@@ -177,12 +181,23 @@ action({ attr: 'name="name"', text: "attr" })
     action({
       attr: "/html/body/div/div/form/fieldset[2]/div[4]/div[2]/input",
       text: "full xpath",
-    })
+    }, null, {timeout: 10000})
       .clear()
-      .type(faker.generateName()),
-      { timeout: 2000 };
+      .type(faker.generateName());
   });
 ```
+
+### cy.action whith maxAttempts to inform how long to wait for the element to become visible
+
+```javascript
+action({
+  attr: '//*[@id="page-walker"]/form/fieldset[1]/div[2]/div/input',
+  text: "xpath",
+  maxAttempts: 4,
+}).type(faker.generateName());
+```
+
+## cy.action ifElse
 
 ```javascript
 it("Tests ifElse", () => {

@@ -27,5 +27,9 @@ declare namespace Cypress {
           Cypress.Shadow
       >
     ): Chainable<any>;
+
+    attributes(attributes: {
+      [key: string]: string;
+    }): Chainable<JQuery<HTMLElement>>;
   }
 }

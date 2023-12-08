@@ -271,3 +271,14 @@ function elementRefactorySelector(attr, regex, doc) {
 Cypress.Commands.add("action", (options, getOptions) => {
   return action(options, getOptions);
 });
+Cypress.Commands.add(
+  "attributes",
+  { prevSubject: true },
+  (subject, attributes) => {
+    return cy.wrap(subject).filter((index, el) => {
+      return Object.entries(attributes).every(([attr, value]) => {
+        return el.getAttribute(attr) === value;
+      });
+    });
+  }
+);
