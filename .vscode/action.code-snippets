@@ -1,0 +1,18 @@
+{ 
+  "Create new cy.action with ifElse": {
+    "scope": "javascript,typescript",
+    "prefix": "actionIf",
+    "body": [
+      "action({ attr: '$1',text: 'action page(opcional)', ifExist: true }, ($el) => $el.type(''));",
+      "$2"
+    ],
+    "description": "Generate new cy.action with ifElse"
+  },
+
+  "Create new cy.action": {
+    "scope": "javascript,typescript",
+    "prefix": "action",
+    "body": ["cy.action({attr: '$1', text: 'opcional'})", "$2"],
+    "description": "Generate new cy.action"
+  }
+}

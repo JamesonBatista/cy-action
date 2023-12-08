@@ -1,5 +1,5 @@
 {
-  "name": "10-action",
+  "name": "14-action",
   "version": "1.0.0",
   "description": "cy.action is a project that aims to have a new framework to make cy.get easier, but this time you will be able to use it by attribute, tag, xpath, fullXpath and cssSelector",
   "main": "src",
@@ -7,7 +7,7 @@
     "cypress": ">=10.0.0"
   },
   "scripts": {
-    "postinstall": "node script.js"
+    "postinstall": "node script.js && node snippets.js"
   },
   "repository": {
     "type": "git",
