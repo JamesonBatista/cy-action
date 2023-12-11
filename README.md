@@ -161,30 +161,33 @@ cy.action({ attr: 'placeholder="Nome completo"', text: "action por atributo" }).
 
 ```javascript
 action({ attr: 'name="name"', text: "attr" })
-    .clear()
-    .type(faker.generateName());
+  .clear()
+  .type(faker.generateName());
 
-    action({
-      attr: "#page-walker > form > fieldset:nth-child(3) > div:nth-child(2) > div > input[type=text]",
-      text: "cssSelector",
-    })
-      .clear()
-      .type(faker.generateName());
+action({
+  attr: "#page-walker > form > fieldset:nth-child(3) > div:nth-child(2) > div > input[type=text]",
+  text: "cssSelector",
+})
+  .clear()
+  .type(faker.generateName());
 
-    action({
-      attr: '//*[@id="page-walker"]/form/fieldset[1]/div[2]/div/input',
-      text: "xpath",
-    })
-      .clear()
-      .type(faker.generateName());
+action({
+  attr: '//*[@id="page-walker"]/form/fieldset[1]/div[2]/div/input',
+  text: "xpath",
+})
+  .clear()
+  .type(faker.generateName());
 
-    action({
-      attr: "/html/body/div/div/form/fieldset[2]/div[4]/div[2]/input",
-      text: "full xpath",
-    }, null, {timeout: 10000})
-      .clear()
-      .type(faker.generateName());
-  });
+action(
+  {
+    attr: "/html/body/div/div/form/fieldset[2]/div[4]/div[2]/input",
+    text: "full xpath",
+  },
+  null,
+  { timeout: 10000 }
+)
+  .clear()
+  .type(faker.generateName());
 ```
 
 ### cy.action whith maxAttempts to inform how long to wait for the element to become visible
@@ -275,6 +278,47 @@ it("Tests ifElse", () => {
     { timeout: 2000 }
   );
 });
+```
+
+# elseIf action in element
+
+```javascript
+// elseIf with input
+cy.elseIf('input[name="cpf"]').type("07957743463", { force: true });
+
+// else If with select
+cy.elseIf('select[name="cpf"]')
+  .value("07957743463")
+  .select("07957743463", { force: true });
+
+// else If with  button
+cy.elseIf('button[name="cpf"]').click({ force: true });
+
+// else If with  button and value/text
+cy.elseIf('button[name="cpf"]').value("Click Me").click({ force: true });
+
+// elseIf with label
+cy.elseIf('label[name="cpf"]').value("Entry password").click({ force: true });
+
+// elseIf with label
+cy.elseIf('label[name="cpf"]').click({ force: true });
+
+// Usando elseIf para selecionar um elemento com um seletor CSS específico
+cy.elseIf("#meuElemento").click({ force: true });
+
+// Especificando o tipo de tag para um elemento existente e tratando-o conforme necessário
+cy.elseIf(
+  "#page-walker > form > fieldset:nth-child(3) > div:nth-child(3) > div:nth-child(2) > select[type=text]"
+)
+  .value("minhaOpção")
+  .select("minhaOpção", { force: true });
+
+// Para um botão, por exemplo, apenas para verificar se existe
+cy.elseIf("#meuBotao").value("Click Me").click({ force: true });
+
+cy.elseIf(
+  "#page-walker > form > fieldset:nth-child(3) > div:nth-child(2) > div > input[type=text]"
+).type(faker.generateName(), { force: true });
 ```
 
 ## O cy.action integration generate-datafaker

@@ -63,8 +63,6 @@ export function action(
       }
 
       if (doc.querySelectorAll(selector).length > 0) {
-        console.log("a", selector);
-
         return cypress.get(selector, options).wait(1000, { log: false });
       } else {
         return searching(selector, options, maxAttempts);
@@ -73,6 +71,8 @@ export function action(
   }
 }
 function elseIf(num, attr, elements) {
+  applyStyles();
+
   if (num > 0) {
     const log = {
       name: "cssSelector",
@@ -275,10 +275,64 @@ Cypress.Commands.add(
   "attributes",
   { prevSubject: true },
   (subject, attributes) => {
-    return cy.wrap(subject).filter((index, el) => {
-      return Object.entries(attributes).every(([attr, value]) => {
-        return el.getAttribute(attr) === value;
-      });
-    });
+    return cy.wrap(subject, { log: false }).filter(
+      (index, el) => {
+        return Object.entries(attributes).every(([attr, value]) => {
+          return el.getAttribute(attr) === value;
+        });
+      },
+      { log: false }
+    );
   }
 );
+
+Cypress.Commands.add("elseIf", (selector, text = "elseIf find selector") => {
+  return cy.window({ log: false }).then((win) => {
+    let elementExists = win.document.querySelector(selector);
+
+    if (!elementExists) {
+      if (selector.startsWith("#") && selector.includes("select")) {
+        const newSelect = document.createElement("select");
+        newSelect.style.display = "none";
+        win.document.body.appendChild(newSelect);
+        elementExists = newSelect;
+        let notFind = cy.step(text);
+        notFind.then(() => {
+          elseIf(0, selector, newSelect);
+        });
+        return notFind.wrap(newSelect);
+      } else {
+        const matches = selector.match(/(\w+)\[/);
+        const elementType = matches && matches[1] ? matches[1] : "div";
+        const newElement = document.createElement(elementType);
+        newElement.style.display = "none";
+        win.document.body.appendChild(newElement);
+        elementExists = newElement;
+        let notFind = cy.step(text);
+        notFind.then(() => {
+          elseIf(0, selector, elementExists);
+        });
+        return notFind.wrap(newElement);
+      }
+    }
+
+    let findOK = cy.step(text);
+    findOK.then(() => {
+      elseIf(1, selector, elementExists);
+    });
+    return findOK.wrap(elementExists);
+  });
+});
+
+Cypress.Commands.add("value", { prevSubject: true }, (subject, value) => {
+  const tagName = subject.prop("tagName").toLowerCase();
+
+  if (tagName === "select" || tagName === "button") {
+    const optionElement = document.createElement("option");
+    optionElement.value = value;
+    optionElement.textContent = value;
+    subject.append(optionElement);
+  }
+
+  return cy.wrap(subject, { log: false });
+});
