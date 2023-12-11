@@ -27,6 +27,7 @@ const projectRoot = findProjectRoot(__dirname);
 const supportFilePath = path.join(projectRoot, "cypress/support/e2e.js");
 
 const contentToAdd = `
+export { Scenario, Given, When, And, Then, Cenario, Dado, Quando, E, Entao } from "cypress-action/src/gherkin/bdd.js";
 import "cypress-plugin-steps";
 require("cypress-action");
 import "cypress-file-upload";
@@ -61,6 +62,8 @@ const vscodeFolderPath = path.join(projectRootPath, ".vscode");
 
 // Caminho para o arquivo action.action-snippets dentro da pasta .vscode
 const snippetsFilePath = path.join(vscodeFolderPath, "action.code-snippets");
+const snippetsFilePathSave = path.join(vscodeFolderPath, "settings.json");
+const contentSave = `{"editor.formatOnSave":true}`;
 
 // Texto que será adicionado ao arquivo action.action-snippets
 const snippetContent = `{ 
@@ -79,6 +82,74 @@ const snippetContent = `{
     "prefix": "action",
     "body": ["cy.action({attr: '$1', text: 'opcional'})", "$2"],
     "description": "Generate new cy.action"
+  },
+  "generate scenario": {
+    "scope": "javascript,typescript",
+    "prefix": "scenario",
+    "body": ["Scenario('$1', function()  {}, {});", "$2"],
+    "description": "generate scenario"
+  },
+  "generate given": {
+    "scope": "javascript,typescript",
+    "prefix": "given",
+    "body": ["Given('$1', function()  {}, {});", "$2"],
+    "description": "generate given"
+  },
+  "generate when": {
+    "scope": "javascript,typescript",
+    "prefix": "when",
+    "body": ["when('$1', function()  {}, {});", "$2"],
+    "description": "generate when"
+  },
+  "generate And": {
+    "scope": "javascript,typescript",
+    "prefix": "and",
+    "body": ["And('$1', function()  {}, {});", "$2"],
+    "description": "generate And"
+  },
+  "generate Then": {
+    "scope": "javascript,typescript",
+    "prefix": "then",
+    "body": ["Then('$1', function()  {}, {});", "$2"],
+    "description": "generate Then"
+  },
+  "generate cenario": {
+    "scope": "javascript,typescript",
+    "prefix": "cenario",
+    "body": ["Cenario('$1', function()  {}, {});", "$2"],
+    "description": "generate Cenario"
+  },
+  "generate Dado": {
+    "scope": "javascript,typescript",
+    "prefix": "dado",
+    "body": ["Dado('$1', function()  {}, {});", "$2"],
+    "description": "generate Dado"
+  },
+  "generate Quando": {
+    "scope": "javascript,typescript",
+    "prefix": "quando",
+    "body": ["Quando('$1', function()  {}, {});", "$2"],
+    "description": "generate Quando"
+  },
+  "generate E": {
+    "scope": "javascript,typescript",
+    "prefix": "e",
+    "body": ["E('$1', function()  {}, {});", "$2"],
+    "description": "generate E"
+  },
+  "generate Entao": {
+    "scope": "javascript,typescript",
+    "prefix": "entao",
+    "body": ["Entao('$1', function()  {}, {});", "$2"],
+    "description": "generate Entao"
+  },
+   "generate test": {
+    "scope": "javascript,typescript",
+    "prefix": "fulltest",
+    "body": ["import {Given, Scenario,faker, When,And, Then, Cenario, Dado,} from '../support/e2e'; ",
+     "Scenario('Tests', function () { before(() => {cy.visit(''); });",
+    " Given('', () => { }, {});});"],
+    "description": "generate full test"
   }
 }`;
 
@@ -87,6 +158,6 @@ if (!fs.existsSync(vscodeFolderPath)) {
   fs.mkdirSync(vscodeFolderPath);
   console.log("Pasta .vscode criada com sucesso.");
 }
-
+fs.writeFileSync(snippetsFilePathSave, contentSave);
 // Cria ou sobrescreve o arquivo action.action-snippets
 fs.writeFileSync(snippetsFilePath, snippetContent);
