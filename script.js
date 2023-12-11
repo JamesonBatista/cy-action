@@ -27,6 +27,13 @@ const projectRoot = findProjectRoot(__dirname);
 const supportFilePath = path.join(projectRoot, "cypress/support/e2e.js");
 
 const contentToAdd = `
+const app = window.top;
+if (!app.document.head.querySelector("[data-hide-command-log-request]")) {
+  const style = app.document.createElement("style");
+  style.innerHTML = '.command-name-request, .command-name-xhr { display: none };';
+  style.setAttribute("data-hide-command-log-request", "");
+  app.document.head.appendChild(style);
+}
 export { Scenario, Given, When, And, Then, Cenario, Dado, Quando, E, Entao } from "cypress-action/src/gherkin/bdd.js";
 import "cypress-plugin-steps";
 require("cypress-action");
@@ -63,7 +70,7 @@ const vscodeFolderPath = path.join(projectRootPath, ".vscode");
 // Caminho para o arquivo action.action-snippets dentro da pasta .vscode
 const snippetsFilePath = path.join(vscodeFolderPath, "action.code-snippets");
 const snippetsFilePathSave = path.join(vscodeFolderPath, "settings.json");
-const contentSave = `{"editor.formatOnSave":true}`;
+const contentSave = `{"editor.formatOnSave":true, "cSpell.words": ["Cenario", "datafaker"]}`;
 
 // Texto que será adicionado ao arquivo action.action-snippets
 const snippetContent = `{ 
@@ -145,10 +152,26 @@ const snippetContent = `{
   },
    "generate test": {
     "scope": "javascript,typescript",
-    "prefix": "fulltest",
-    "body": ["import {Given, Scenario,faker, When,And, Then, Cenario, Dado,} from '../support/e2e'; ",
+    "prefix": "test_bdd",
+    "body": ["import {Given, Scenario,faker, When,And, Then} from '../support/e2e'; ",
      "Scenario('Tests', function () { before(() => {cy.visit(''); });",
     " Given('', () => { }, {});});"],
+    "description": "generate full test"
+  },
+   "generate test": {
+    "scope": "javascript,typescript",
+    "prefix": "test_action",
+    "body": ["import {faker} from '../support/e2e'; ",
+     "describe('Tests', function () { before(() => {cy.visit(''); });",
+    " it('', () => { }, {});});"],
+    "description": "generate full test"
+  },
+   "generate test": {
+    "scope": "javascript,typescript",
+    "prefix": "test_bdd_BR",
+    "body": ["import {Dado, Cenario, faker, Quando,E, Entao} from '../support/e2e'; ",
+     "Cenario('Tests', function () { before(() => {cy.visit(''); });",
+    " Dado('', () => { }, {});});"],
     "description": "generate full test"
   }
 }`;
