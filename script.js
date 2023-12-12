@@ -174,7 +174,7 @@ const snippetContent = `{
     "prefix": "test_bdd_BR",
     "body": ["import {Dado, Cenario, faker, Quando,E, Entao} from '../support/e2e'; ",
      "Cenario('$1', function () {",
-     "before(() => {cy.visit(""); })"
+     "before(() => {cy.visit(''); })",
     "Dado('$2', function () {}, {});",
     "Quando('$3', function () {}, {});",
     "E('$4', function () {}, {});",
@@ -183,9 +183,49 @@ const snippetContent = `{
     ],
     "description": "generate full test"
   }
+,
+  "generate elseIf": {
+    "scope": "javascript,typescript",
+    "prefix": "elseIf",
+    "body": ["cy.elseIf('ex: input[name='name']').type('test', {force: true})", "$2"],
+    "description": "generate elseIf"
+  }
+
+
 }`;
 
-// Cria a pasta .vscode se ela não existir
+try {
+  // Define o caminho da raiz do projeto
+  const projectRootPathJsconfig = path.resolve(__dirname, "../../");
+  console.log(`Caminho da raiz do projeto: ${projectRootPath}`);
+
+  // Define o caminho para o arquivo jsconfig.json na raiz do projeto
+  const jsconfigFilePath = path.join(projectRootPathJsconfig, "jsconfig.json");
+
+  // Conteúdo para o arquivo jsconfig.json
+  const contentTsConfig = `{
+  "compilerOptions": {
+    // "target": "ES6",
+    //"module": "commonjs",
+    //"lib": ["es6", "dom"],
+    // "baseUrl": "./",
+    // "paths": {
+    //   "@/*": ["./path/to/aliases/*"]
+    // },
+    "types": ["cypress"]
+  },
+  // "include": ["**/*"],
+  "exclude": ["node_modules"]
+}
+`;
+
+  // Escreve o conteúdo no arquivo jsconfig.json
+  fs.writeFileSync(jsconfigFilePath, contentTsConfig);
+  console.log("Arquivo jsconfig.json criado com sucesso na raiz do projeto.");
+} catch (error) {
+  console.error("Erro ao criar o arquivo jsconfig.json:", error);
+}
+
 if (!fs.existsSync(vscodeFolderPath)) {
   fs.mkdirSync(vscodeFolderPath);
   console.log("Pasta .vscode criada com sucesso.");

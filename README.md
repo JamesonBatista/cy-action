@@ -85,11 +85,6 @@ export const faker = require("generate-datafaker");
 import "cypress-wait-until";
 ```
 
-## Snippets
-
-> action <br>
-> actionIf
-
 ## Use
 
 The `cy.action` command can be used in your Cypress tests as follows:
