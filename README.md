@@ -6,6 +6,10 @@
 ![generate-datafaker](https://img.shields.io/badge/datafaker-1.0.2-yellow)
 ![fileUpload](https://img.shields.io/badge/fileUpload-5.0.8-blue)
 
+### generate-datafaker
+
+[generate-datafaker](https://www.npmjs.com/package/generate-datafaker)
+
 ### Required
 
 | NodeJs
@@ -26,6 +30,44 @@ To install the package, run the following command in your Cypress project:
 ```bash
 npm i cypress-action
 ```
+
+## Use Snippets in cy.action
+
+> ### action<br>
+>
+> ### action<br>
+>
+> ### actionIf<br>
+>
+> ### elseIf<br>
+>
+> ### test_bdd<br>
+>
+> ### test_action<br>
+>
+> ### test_bdd_BR<br>
+>
+> ### scenario<br>
+>
+> ### given<br>
+>
+> ### when<br>
+>
+> ### and<br>
+>
+> ### then<br>
+>
+> ### cenario<br>
+>
+> ### dado<br>
+>
+> ### quando<br>
+>
+> ### e<br>
+>
+> ### entao<br>
+>
+> <br>
 
 ## Settings
 
@@ -319,6 +361,37 @@ cy.elseIf("#meuBotao").value("Click Me").click({ force: true });
 cy.elseIf(
   "#page-walker > form > fieldset:nth-child(3) > div:nth-child(2) > div > input[type=text]"
 ).type(faker.generateName(), { force: true });
+```
+
+## Use BDD in cy.action
+
+```javascript
+import { Dado, Cenario, faker, Quando, E, Entao } from "../support/e2e";
+
+Cenario("", function () {
+  Dado("", function () {}, {});
+  Quando("", function () {}, {});
+  E("", function () {}, {});
+  Entao("", function () {}, {});
+});
+```
+
+## BDD whit options skip and only
+
+```javacript
+import { Dado, Cenario, faker, Quando, E, Entao } from "../support/e2e";
+
+Cenario("Tests", function () {
+
+ Dado("Dado tests", function () {
+
+ }, { skip: true });
+
+ Quando("Quando tests", function () {
+
+ }, { only: true });
+});
+
 ```
 
 ## O cy.action integration generate-datafaker

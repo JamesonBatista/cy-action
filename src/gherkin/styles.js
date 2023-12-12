@@ -9,13 +9,13 @@ module.exports = function gherkinStyles() {
     let bddFailed = `#unified-reporter > div > div > div.wrap > ul > li > div > div.collapsible-content.runnables-region > ul > li.test.runnable.runnable-failed `;
     style.innerHTML = `
      ${scenarioSelector} {
-       background-color: #7fff0025;
-    border-radius: 10px;
-    margin: 10px;
+      background-color: #7fff0065;
+      border-radius: 10px;
+      margin: 10px;
       }
  
       ${bdd}{
-        background-color:  #7fff0018;
+        background-color:  #7fff0038;
         border-radius: 10px;
         margin: 5px;
       }
@@ -32,9 +32,13 @@ module.exports = function gherkinStyles() {
 
       }
       ${scenarioSelector} span > span.runnable-title{
-                color: white;
-            font-weight: bold;
-    letter-spacing: 1.5px;
+        color: white;
+        font-weight: bold;
+        letter-spacing: 1px;
+      }
+
+      ${scenarioSelector} span > span.runnable-title:hover, ${bdd} > span > span > span:hover{
+        letter-spacing: 2px;
       }
 
       ${bddFailed} > div > div > div > div.collapsible-header-inner{

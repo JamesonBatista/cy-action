@@ -70,7 +70,7 @@ const vscodeFolderPath = path.join(projectRootPath, ".vscode");
 // Caminho para o arquivo action.action-snippets dentro da pasta .vscode
 const snippetsFilePath = path.join(vscodeFolderPath, "action.code-snippets");
 const snippetsFilePathSave = path.join(vscodeFolderPath, "settings.json");
-const contentSave = `{"editor.formatOnSave":true, "cSpell.words": ["Cenario", "datafaker"]}`;
+const contentSave = `{"editor.formatOnSave":true, "cSpell.words": ["Cenario", "datafaker", "Entao"]}`;
 
 // Texto que será adicionado ao arquivo action.action-snippets
 const snippetContent = `{ 
@@ -150,28 +150,37 @@ const snippetContent = `{
     "body": ["Entao('$1', function()  {}, {});", "$2"],
     "description": "generate Entao"
   },
-   "generate test": {
+   "generate test bdd": {
     "scope": "javascript,typescript",
     "prefix": "test_bdd",
     "body": ["import {Given, Scenario,faker, When,And, Then} from '../support/e2e'; ",
-     "Scenario('Tests', function () { before(() => {cy.visit(''); });",
-    " Given('', () => { }, {});});"],
+    "Scenario('', function () {",
+     "before(() => {cy.visit(''); });",
+     "Given('', function () {}, {});});"],
     "description": "generate full test"
   },
-   "generate test": {
+   "generate test action": {
     "scope": "javascript,typescript",
     "prefix": "test_action",
     "body": ["import {faker} from '../support/e2e'; ",
-     "describe('Tests', function () { before(() => {cy.visit(''); });",
-    " it('', () => { }, {});});"],
+     "describe('', function()  {",
+    "  before(()=>{cy.visit('')})",
+    " it('', function() { });});"
+    ],
     "description": "generate full test"
   },
    "generate test": {
     "scope": "javascript,typescript",
     "prefix": "test_bdd_BR",
     "body": ["import {Dado, Cenario, faker, Quando,E, Entao} from '../support/e2e'; ",
-     "Cenario('Tests', function () { before(() => {cy.visit(''); });",
-    " Dado('', () => { }, {});});"],
+     "Cenario('$1', function () {",
+     "before(() => {cy.visit(""); })"
+    "Dado('$2', function () {}, {});",
+    "Quando('$3', function () {}, {});",
+    "E('$4', function () {}, {});",
+    "Entao('$5', function () {}, {});",
+    "});"
+    ],
     "description": "generate full test"
   }
 }`;
