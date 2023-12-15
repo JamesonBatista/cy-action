@@ -27,14 +27,7 @@ const projectRoot = findProjectRoot(__dirname);
 const supportFilePath = path.join(projectRoot, "cypress/support/e2e.js");
 
 const contentToAdd = `
-const app = window.top;
-if (!app.document.head.querySelector("[data-hide-command-log-request]")) {
-  const style = app.document.createElement("style");
-  style.innerHTML = '.command-name-request, .command-name-xhr { display: none };';
-  style.setAttribute("data-hide-command-log-request", "");
-  app.document.head.appendChild(style);
-}
-export { Scenario, Given, When, And, Then, Cenario, Dado, Quando, E, Entao } from "cypress-action/src/gherkin/bdd.js";
+export { Scenario, Given, When, And, Then, Cenario, Dado, Quando, E, Entao, describes, its } from "cypress-action/src/gherkin/bdd.js";
 import "cypress-plugin-steps";
 require("cypress-action");
 import "cypress-file-upload";
@@ -158,6 +151,14 @@ const snippetContent = `{
      "before(() => {cy.visit(''); });",
      "Given('', function () {}, {});});"],
     "description": "generate full test"
+  },
+   "generate test describes its": {
+    "scope": "javascript,typescript",
+    "prefix": "test_des_its",
+    "body": ["import {describes, its,faker} from '../support/e2e'; ",
+    "describes('', function () {",
+     "its('', function () {}, {});});"],
+    "description": "generate full test describes its"
   },
    "generate test action": {
     "scope": "javascript,typescript",

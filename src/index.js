@@ -286,11 +286,17 @@ Cypress.Commands.add(
   }
 );
 
-Cypress.Commands.add("elseIf", (selector, text = "elseIf find selector") => {
+Cypress.Commands.add("elseIf", (selector, options = {}) => {
+  const { text = "elseIf find selector", error = false } = options;
+
   return cy.window({ log: false }).then((win) => {
-    let elementExists = win.document.querySelector(selector);
+    const elementExists = win.document.querySelector(selector);
 
     if (!elementExists) {
+      if (error) {
+        return cy.step(text).get(selector);
+      }
+
       if (selector.startsWith("#") && selector.includes("select")) {
         const newSelect = document.createElement("select");
         newSelect.style.display = "none";

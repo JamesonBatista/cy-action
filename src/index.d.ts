@@ -47,7 +47,10 @@ declare namespace Cypress {
      * @param selector The CSS selector to query the element.
      * @example cy.elseIf('input[name="name"]')
      */
-    elseIf(selector: string): Chainable<JQuery<HTMLElement>>;
+    elseIf(
+      selector: string,
+      options?: { text?: string; error?: boolean }
+    ): Chainable<JQuery<HTMLElement>>;
 
     /**
      * Custom command to add a value to a select or button element.

@@ -389,6 +389,48 @@ Cenario("Tests", function () {
 
 ```
 
+## Use cy.visit in mode hiden
+
+```javascript
+const { defineConfig } = require("cypress");
+
+module.exports = defineConfig({
+  e2e: {
+    setupNodeEvents(on, config) {
+      // implement node event listeners here
+    },
+  },
+  viewportHeight: 1000,
+  viewportWidth: 1400,
+
+  env: {
+    title: "Tests With Cypress and cy.action 💥",
+    subTitle: "CY.ACTION presentation",
+    // url: "https://walkdog.vercel.app/signup",
+    urlEach: "https://walkdog.vercel.app/signup",
+    urlOptions: {
+      // options cy.visit('https:', {})
+      timeout: 10000,
+    },
+    styles:{
+      background: 'red',
+      text:'green'
+    }
+  },
+});
+
+
+
+> in test
+
+import { Given, Scenario, faker, When, And, Then } from "../support/e2e";
+Scenario("Test with visit in mod hiden", function () {
+  Given("Visit hiden with cy.action", function () {}, {});
+});
+
+
+```
+
 ## O cy.action integration generate-datafaker
 
 ## Contributions
