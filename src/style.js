@@ -29,14 +29,6 @@ module.exports = function applyStyles() {
     app.document.head.appendChild(style);
   }
 
-  if (!app.document.head.querySelector("[data-hide-command-log-request]")) {
-    const style = app.document.createElement("style");
-    style.innerHTML =
-      ".command-name-request, .command-name-xhr { display: none };";
-    style.setAttribute("data-hide-command-log-request", "");
-    app.document.head.appendChild(style);
-  }
-
   const spanElement = app.document.querySelector(
     "#unified-reporter > div > div > div.runnable-header > span"
   );
@@ -45,12 +37,15 @@ module.exports = function applyStyles() {
   );
 
   if (spanElement) {
+    spanElement.style.letterSpacing = "2px";
     spanElement.innerText = Cypress.env("subTitle")
       ? Cypress.env("subTitle")
       : "🆃🅴🆂🆃🆂 🅸🅽 🅲🆈🅿🆁🅴🆂🆂";
   }
 
   if (spanElement2) {
+    spanElement2.style.letterSpacing = "2px";
+
     spanElement2.innerText = Cypress.env("title")
       ? Cypress.env("title")
       : "🅲🆈🅿🆁🅴🆂🆂";

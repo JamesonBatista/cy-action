@@ -3,6 +3,32 @@ const applyStyles = require("../style");
 
 function createTestWrapper(testFunction) {
   return function (text, callback, options = {}) {
+    const app = window.top;
+    const spanElement = app.document.querySelector(
+      "#unified-reporter > div > div > div.runnable-header > span"
+    );
+
+    // Injetar a fonte do Google Fonts
+    const fontLink = app.document.createElement("link");
+    fontLink.href =
+      "https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap";
+    fontLink.rel = "stylesheet";
+    app.document.head.appendChild(fontLink);
+
+    // Verifique se o elemento existe e se a variável de ambiente não está definida
+    if (spanElement && !Cypress.env("subTitle")) {
+      spanElement.innerText = text;
+
+      // Aplicar estilos ao elemento
+      spanElement.style.backgroundColor = "gray";
+      spanElement.style.color = "white";
+      spanElement.style.borderRadius = "5px";
+
+      // Definir um atraso para garantir que a fonte seja carregada antes de aplicá-la
+      setTimeout(() => {
+        spanElement.style.fontFamily = "Roboto, sans-serif";
+      }, 500); // Ajuste o tempo conforme necessário
+    }
     const { skip, only } = options;
     if (only) {
       return testFunction.only(text, callback);

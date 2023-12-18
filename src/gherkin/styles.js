@@ -34,7 +34,7 @@ module.exports = function gherkinStyles() {
       }
 ${scenarioSelector}:hover, ${bdd}:hover {
   background: linear-gradient(to right, white, ${
-    colorBDD.background ? colorBDD.background : "#ffffff80"
+    colorBDD.background ? colorBDD.background : "#000"
   } );
   box-shadow: 0px 4px 8px rgba(128, 128, 128, 0.2);
   animation: gradientAnimation 2s ease-in-out infinite;
