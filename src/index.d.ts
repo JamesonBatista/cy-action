@@ -59,5 +59,18 @@ declare namespace Cypress {
      * @example cy.elseIf('select[name="gender"]').value('female')
      */
     value(value: string): Chainable<JQuery<HTMLElement>>;
+
+    /**
+     * Custom Cypress command to perform a CRUD operation visit.
+     *
+     * @param url The URL to visit.
+     * @param options Visit options.
+     * @example
+     * cy.crudVisit('https://example.com', { timeout: 5000 })
+     */
+    crudVisit(
+      url?: string,
+      options?: Partial<cy.VisitOptions>
+    ): Chainable<Window>;
   }
 }

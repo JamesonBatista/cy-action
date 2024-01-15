@@ -1,82 +1,65 @@
+import { actionStorage } from "./gherkin/bdd.js";
+
 const applyStyles = require("./style.js");
+require("./gherkin/bdd.js");
+let startStyle = false;
 export function action(
-  { attr = "", text = null, ifExist = false, maxAttempts = 6 },
-  test,
+  { attr = "", text = null, maxAttempts = 3 },
   options = {}
 ) {
-  applyStyles();
   let regex = /^[!@#$%¨&*()_+{}[\]:;,.?~\\\/|]/.test(attr);
-  const search = (selector, test) => {
+  return cy.document({ log: false }).then((doc) => {
     let cypress;
     if (text) {
       cypress = cy.step(text);
     } else {
       cypress = cy;
     }
-    return cy.get("body", { log: false }).then(($body) => {
-      const doc = $body[0].ownerDocument;
-      const sel = elementRefactorySelector(selector, regex, doc);
-      const element = $body.find(sel);
 
-      if (element.length) {
-        elseIf(1, selector, element);
-        return test(cy.wrap(element));
-      } else {
-        elseIf(0, selector, element);
-        return null;
+    if (typeof attr === "object") {
+      if (!window && !actionStorage.find) {
+        actionStorage.find = {};
       }
-    });
-  };
-
-  if (ifExist) {
-    if (attr.startsWith("//")) {
-      return searchingXpathifElse(attr).then((elements) => {
-        if (elements.length > 0) {
-          elseIf(1, attr, elements);
-          return test(cy.wrap(elements));
-        } else {
-          elseIf(0, attr, elements);
-          return cy.wrap(null, { log: false });
-        }
-      });
+      actionStorage.find.element = attr;
+      return cypress.get(attr, options).wait(1000, { log: false });
     }
 
-    return search(attr, test);
-  } else {
-    return cy.document({ log: false }).then((doc) => {
-      let cypress;
-      if (text) {
-        cypress = cy.step(text);
-      } else {
-        cypress = cy;
+    if (attr.startsWith("//")) {
+      if (!window && !actionStorage.find) {
+        actionStorage.find = {};
       }
-      if (typeof attr === "object") {
-        return cypress.get(attr, options).wait(1000, { log: false });
+      const el = searchingXpath(attr);
+      actionStorage.find.element = el;
+      return el;
+    }
+    const selector = elementRefactorySelector(attr, regex, doc);
+    if (typeof selector === "object") {
+      if (!window && !actionStorage.find) {
+        actionStorage.find = {};
+      }
+      actionStorage.find.element = selector;
+      return cypress.get(selector, options).wait(1000, { log: false });
+    }
+
+    if (doc.querySelectorAll(selector).length > 0) {
+      if (!window && !actionStorage.find) {
+        actionStorage.find = {};
       }
 
-      if (attr.startsWith("//")) {
-        return searchingXpath(attr);
-      }
-      const selector = elementRefactorySelector(attr, regex, doc);
-      if (typeof selector === "object") {
-        return cypress.get(selector, options).wait(1000, { log: false });
-      }
-
-      if (doc.querySelectorAll(selector).length > 0) {
-        return cypress.get(selector, options).wait(1000, { log: false });
-      } else {
-        return searching(selector, options, maxAttempts);
-      }
-    });
-  }
+      actionStorage.find.element = doc.querySelectorAll(selector);
+      return cypress
+        .get(doc.querySelectorAll(selector), options)
+        .wait(1000, { log: false });
+    } else {
+      return searching(selector, options, maxAttempts);
+    }
+  });
 }
 function elseIf(num, attr, elements) {
-  applyStyles();
-
   if (num > 0) {
     const log = {
-      name: "cssSelector",
-      message: `✅  exist: element '${attr}' found`,
+      name: "elseIf",
+      message: `✅  exist:  ${attr} `,
       consoleProps: () => {
         return {
           XPath: attr,
@@ -88,8 +71,8 @@ function elseIf(num, attr, elements) {
     Cypress.log(log);
   } else {
     const log = {
-      name: "not-cssSelector",
-      message: `🔴  skipped: element '${attr}' not found`,
+      name: "no-elseIf",
+      message: `🔴  skipped:  ${attr} not found`,
       consoleProps: () => {
         return {
           XPath: attr,
@@ -108,12 +91,16 @@ function searching(attr, options, maxAttempts) {
     cy.document({ log: false }).then((doc) => {
       const waitTime = attempt * baseWaitTime;
 
-      cy.log(`🔍 searching *${attr}* in page, ${attempt}ª tentativa...`)
+      cy.log(`🔍 searching *${attr}*, ${attempt}ª tentativa...`)
         .wait(waitTime)
         .then(() => {
           let selector = doc.querySelectorAll(attr);
           if (selector.length > 0) {
             return cy.get(selector, options).wait(1000, { log: false });
+          } else {
+            if (attempt === maxAttempts) {
+              return cy.get(selector, options).wait(1000, { log: false });
+            }
           }
 
           if (attempt < maxAttempts) {
@@ -287,14 +274,17 @@ Cypress.Commands.add(
 );
 
 Cypress.Commands.add("elseIf", (selector, options = {}) => {
-  const { text = "elseIf find selector", error = false } = options;
-
+  const { text = null, error = false } = options;
+  let cyaction = cy;
+  if (text) {
+    cyaction = cy.step(text);
+  }
   return cy.window({ log: false }).then((win) => {
-    const elementExists = win.document.querySelector(selector);
+    let elementExists = win.document.querySelector(selector);
 
     if (!elementExists) {
       if (error) {
-        return cy.step(text).get(selector);
+        return cyaction.get(selector);
       }
 
       if (selector.startsWith("#") && selector.includes("select")) {
@@ -302,11 +292,11 @@ Cypress.Commands.add("elseIf", (selector, options = {}) => {
         newSelect.style.display = "none";
         win.document.body.appendChild(newSelect);
         elementExists = newSelect;
-        let notFind = cy.step(text);
+        let notFind = cyaction;
         notFind.then(() => {
           elseIf(0, selector, newSelect);
         });
-        return notFind.wrap(newSelect);
+        return notFind.wrap(newSelect, { log: false });
       } else {
         const matches = selector.match(/(\w+)\[/);
         const elementType = matches && matches[1] ? matches[1] : "div";
@@ -314,19 +304,19 @@ Cypress.Commands.add("elseIf", (selector, options = {}) => {
         newElement.style.display = "none";
         win.document.body.appendChild(newElement);
         elementExists = newElement;
-        let notFind = cy.step(text);
+        let notFind = cyaction;
         notFind.then(() => {
           elseIf(0, selector, elementExists);
         });
-        return notFind.wrap(newElement);
+        return notFind.wrap(newElement, { log: false });
       }
     }
 
-    let findOK = cy.step(text);
+    let findOK = cyaction;
     findOK.then(() => {
       elseIf(1, selector, elementExists);
     });
-    return findOK.wrap(elementExists);
+    return findOK.wrap(elementExists, { log: false });
   });
 });
 
@@ -342,3 +332,89 @@ Cypress.Commands.add("value", { prevSubject: true }, (subject, value) => {
 
   return cy.wrap(subject, { log: false });
 });
+
+Cypress.Commands.add(
+  "crudVisit",
+  (
+    url = Cypress.env("baseUrl") || Cypress.env("url") || Cypress.env("visit"),
+    options = {}
+  ) => {
+    cy.then(() => {
+      applyStyles();
+      if (!startStyle) {
+        function executeCodeEvery2Seconds() {
+          const app = window.top;
+          const commands = app.document.querySelectorAll(
+            ".reporter .command-state-passed:not(.command-is-event, .command-type-system) .command-method span"
+          );
+          const commandselseIf = app.document.querySelectorAll(
+            ".reporter .command-state-passed:not(.command-is-event, .command-type-system) .command-method span"
+          );
+          const elseIfError = app.document.querySelectorAll(
+            "#unified-reporter > div > div > div.wrap > ul > li > div > div.collapsible-content.runnables-region > ul > li > div > div.collapsible-content.runnable-instruments > div > ul > li > div > div.collapsible-content.attempt-content > div > div > ul > li > div > div.collapsible-content > ul > li.command.command-name-no-elseIf > div > span > div > span.command-info > span.command-method > span"
+          );
+
+          commands.forEach((span) => {
+            if (
+              span.textContent.includes("get") ||
+              span.textContent.includes("xpath") ||
+              span.textContent.includes("fullXpath")
+            ) {
+              span.textContent = span.textContent.replace(/get/gi, "action");
+              span.textContent = span.textContent.replace(/xpath/gi, "action");
+              span.textContent = span.textContent.replace(
+                /fullXpath/gi,
+                "action"
+              );
+              span.style.backgroundColor = "#0080005c";
+              span.style.padding = "3px";
+              span.style.borderRadius = "5px";
+              span.style.paddingLeft = "8px";
+              span.style.paddingRight = "8px";
+            }
+          });
+
+          commands.forEach((span) => {
+            if (
+              span.textContent.includes("type") ||
+              span.textContent.includes("click") ||
+              span.textContent.includes("select") ||
+              span.textContent.includes("should") ||
+              span.textContent.includes("contains") ||
+              span.textContent.includes("select")
+            ) {
+              span.style.backgroundColor = "rgb(237 215 11 / 36%)";
+              span.style.padding = "3px";
+              span.style.borderRadius = "5px";
+              span.style.paddingLeft = "8px";
+              span.style.paddingRight = "8px";
+            }
+          });
+
+          commandselseIf.forEach((span) => {
+            if (span.textContent.includes("elseIf")) {
+              span.style.backgroundColor = "#0080005c";
+              span.style.padding = "3px";
+              span.style.borderRadius = "5px";
+              span.style.paddingLeft = "8px";
+              span.style.paddingRight = "8px";
+            }
+          });
+
+          elseIfError.forEach((span) => {
+            span.style.backgroundColor = "#b71f1f80";
+            span.style.padding = "3px";
+            span.style.borderRadius = "5px";
+            span.style.paddingLeft = "8px";
+            span.style.paddingRight = "8px";
+          });
+
+          startStyle = true;
+        }
+
+        setInterval(executeCodeEvery2Seconds, 200);
+        return cy.visit(url, options);
+      }
+    });
+  }
+);
