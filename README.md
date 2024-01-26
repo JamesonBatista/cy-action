@@ -98,17 +98,6 @@ The `cy.action` command can be used in your Cypress tests as follows:
 cy.action({ attr: "my-selector" }).click(); // Options passed as second argument
 ```
 
-```javascript
-// Example of using the `action` command
-cy.action(
-  { attr: 'name="nam"', text: "Action description", maxAttempts: 8 },
-  null,
-  {
-    timeout: 10000000,
-  }
-).type("olá"); // Options passed as second argument
-```
-
 ### Parameters
 
 - `attr`: The element selector (string). It can be an attribute, tag, CSS or XPath selector.
@@ -116,6 +105,10 @@ cy.action(
 - `options`: Additional Cypress options, such as `timeout`.
 
 ### Examples
+
+```javascript
+cy.action({ attr: "my-selector" }, { timeout: 10000 }).click();
+```
 
 #### Selecting by Attribute
 
@@ -220,7 +213,6 @@ action(
     attr: "/html/body/div/div/form/fieldset[2]/div[4]/div[2]/input",
     text: "full xpath",
   },
-  null,
   { timeout: 10000 }
 )
   .clear()
@@ -235,86 +227,6 @@ action({
   text: "xpath",
   maxAttempts: 4,
 }).type(faker.generateName());
-```
-
-## cy.action ifElse
-
-```javascript
-it("Tests ifElse", () => {
-  // atributo
-  action({ attr: 'name="name"', text: "attr", ifExist: true }, (el) =>
-    el.type(faker.generateName())
-  );
-  //
-  action({ attr: 'name="nam"', text: "attr not exist", ifExist: true }, (el) =>
-    el.type(faker.generateName())
-  );
-  // cssSelector
-  action(
-    {
-      attr: "#page-walker > form > fieldset:nth-child(3) > div:nth-child(3) > div:nth-child(1) > input[type=text]",
-      text: "css selector",
-      ifExist: true,
-    },
-    (el) => el.type(faker.generateEmails())
-  );
-  // cssSelector element not exist
-  action(
-    {
-      attr: "#page-walker > form > fieldset:nth-child(3) > div:nth-child(3) > div:nth-child(1) > input[type=text]",
-      text: "css selector not exist",
-      ifExist: true,
-    },
-    (el) => el.type(faker.generateEmails())
-  );
-  // xpath
-  action(
-    {
-      attr: '//*[@id="page-walker"]/form/fieldset[1]/div[3]/div[2]/input',
-      text: "xpath element ",
-      ifExist: true,
-    },
-    (el) => el.type(faker.generateCPF())
-  );
-  // xpath element not exist
-  action(
-    {
-      attr: '//*[@id="page-walker"]/form/fieldset[1]/div[3]/div[2]/inpu',
-      text: "xpath element not exist",
-      ifExist: true,
-    },
-    (el) => el.type(faker.generateCPF())
-  );
-  //fullxpath
-  action(
-    {
-      attr: "/html/body/div/div/form/fieldset[2]/div[4]/div[2]/input",
-      text: "fullxpath elemen",
-      ifExist: true,
-    },
-    (el) => el.type(faker.generateStreet())
-  );
-  //fullxpath not exist
-  action(
-    {
-      attr: "/html/body/div/div/form/fieldset[2]/div[4]/div[2]/inpu",
-      text: "fullxpath element not exist",
-      ifExist: true,
-    },
-    (el) => el.type(faker.generateStreet())
-  );
-
-  // with options cypress
-  action(
-    {
-      attr: "/html/body/div/div/form/fieldset[2]/div[4]/div[2]/inpu",
-      text: "fullxpath element not exist",
-      ifExist: true,
-    },
-    (el) => el.type(faker.generateStreet()),
-    { timeout: 2000 }
-  );
-});
 ```
 
 # elseIf action in element
@@ -356,6 +268,25 @@ cy.elseIf("#meuBotao").value("Click Me").click({ force: true });
 cy.elseIf(
   "#page-walker > form > fieldset:nth-child(3) > div:nth-child(2) > div > input[type=text]"
 ).type(faker.generateName(), { force: true });
+```
+
+# Mixed Functions
+
+```javascript
+cy.action({ attr: selects.fillName })
+  .click()
+  .elseIf('input[name="name"]')
+  .type("Test");
+
+cy.action({ attr: selects.fillEmail })
+  .click()
+  .act('name="email"') //action
+  .type("Test#test.com");
+
+cy.action({ attr: selects.fillName })
+  .click()
+  .If('input[name="name"]') // elseIf
+  .type("Test");
 ```
 
 ## Use BDD in cy.action

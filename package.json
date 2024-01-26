@@ -1,7 +1,7 @@
 {
   "name": "cypress-action",
-  "version": "1.2.6",
-  "description": "cy.action is a project that aims to have a new framework to make cy.get easier, but this time you will be able to use it by attribute, tag, xpath, fullXpath and cssSelector",
+  "version": "1.4.7",
+  "description": "cypress.action is a project that aims to have a new framework to make cy.get easier, but this time you will be able to use it by attribute, tag, xpath, fullXpath and cssSelector",
   "main": "src",
   "peerDependencies": {
     "cypress": ">=10.0.0"
@@ -23,10 +23,11 @@
   "files": [
     "src",
     "script.js",
+    "start.js",
     "gherkin"
   ],
   "types": "src",
-  "author": "Jam Batista QA Specialist <batistadado@gmail.com>",
+  "author": "Jam Batista QA Automation Specialist <batistadado@gmail.com>",
   "license": "MIT",
   "bugs": {
     "url": "https://github.com/JamesonBatista/cy-action/issues"
@@ -43,6 +44,7 @@
     "generate-datafaker": "^1.0.2",
     "uuidv4": "^6.2.13",
     "mocha": "^10.2.0",
+    "cypress-mochawesome-reporter": "^3.7.0",
     "mochawesome": "^7.1.3",
     "mochawesome-merge": "^4.3.0",
     "mochawesome-report-generator": "^6.2.0"

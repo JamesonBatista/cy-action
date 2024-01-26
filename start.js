@@ -63,11 +63,11 @@ fs.readFile(`${jsconfigFilePath}/app.js`, "utf8", (err, data) => {
     },
     {
       procurar: "6.2.0",
-      substituirPor: `${packageJson.version} - | QA | Tester |`,
+      substituirPor: `${packageJson.version} - | QA | Tester | `,
     },
     {
       procurar: "Mochawesome",
-      substituirPor: "cypress-crud",
+      substituirPor: "🅲🆈🅿🆁🅴🆂🆂-🅰🅲🆃🅸🅾🅽 ",
     },
   ];
 
@@ -86,6 +86,7 @@ fs.readFile(`${jsconfigFilePath}/app.js`, "utf8", (err, data) => {
   });
   let css = `html, main, .test--code-snippet---3H5Xj.hljs, .test--context-item---R1NNU, .test--context---1YYgX {
     background: black;
+  
   }
 .navbar--component---2UCEi{
     background: black;
@@ -107,7 +108,12 @@ h4{
 
   fs.appendFile(`${jsconfigFilePath}/app.css`, css, "utf8", (err) => {
     if (err) {
-      console.error("Erro ao adicionar texto no arquivo:", err);
+      console.error("Error:", err);
+    }
+  });
+  fs.appendFile(`${jsconfigFilePath}/app.inline.css`, css, "utf8", (err) => {
+    if (err) {
+      console.error("Error:", err);
     }
   });
 });

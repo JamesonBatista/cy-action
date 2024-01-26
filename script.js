@@ -48,6 +48,9 @@ import "cypress-file-upload";
 require("cypress-xpath");
 export const faker = require("generate-datafaker");
 import "cypress-wait-until";
+import "cypress-mochawesome-reporter/register";
+
+//hiden xhr trash in ui cypress
 const app = window.top;
 if (!app.document.head.querySelector("[data-hide-command-log-request]")) {
   const style = app.document.createElement("style");
@@ -64,12 +67,7 @@ const appendToFile = (filePath, content) => {
     // Verificar se o conteúdo já existe no arquivo
     if (!existingContent.includes(content.trim())) {
       fs.appendFileSync(filePath, content, "utf8");
-      console.log(`add in path ${filePath}`);
-    } else {
-      console.log(`text exist in path ${filePath}`);
     }
-  } else {
-    console.error(`path not found: ${filePath}`);
   }
 };
 
@@ -87,22 +85,18 @@ const snippetsFilePathSave = path.join(vscodeFolderPath, "settings.json");
 const contentSave = `{"editor.formatOnSave":true, "cSpell.words": ["Cenario", "datafaker", "Entao"]}`;
 
 // Texto que será adicionado ao arquivo action.action-snippets
-const snippetContent = `{ 
-  "Create new cy.action with ifElse": {
-    "scope": "javascript,typescript",
-    "prefix": "actionIf",
-    "body": [
-      "cy.action({ attr: '$1',text: 'action page(opcional)', ifExist: true }, ($el) => $el.type(''));",
-      "$2"
-    ],
-    "description": "Generate new cy.action with ifElse"
-  },
-
+const snippetContent = `{
   "Create new cy.action": {
     "scope": "javascript,typescript",
     "prefix": "action",
     "body": ["cy.action({attr: '$1', text: 'opcional'})", "$2"],
     "description": "Generate new cy.action"
+  },
+  "Create new cy.act": {
+    "scope": "javascript,typescript",
+    "prefix": "act",
+    "body": [".act('$1')", "$2"],
+    "description": "Generate new cy.act"
   },
   "generate scenario": {
     "scope": "javascript,typescript",
@@ -164,57 +158,70 @@ const snippetContent = `{
     "body": ["Entao('$1', function()  {}, {});", "$2"],
     "description": "generate Entao"
   },
-   "generate test bdd": {
+  "generate test bdd": {
     "scope": "javascript,typescript",
     "prefix": "test_bdd",
-    "body": ["import {Given, Scenario,faker, When,And, Then} from '../support/e2e'; ",
-    "Scenario('', function () {",
-     "before(() => {cy.visit(''); });",
-     "Given('', function () {}, {});});"],
+    "body": [
+      "import {Given, Scenario,faker, When,And, Then} from '../support/e2e'; ",
+      "Scenario('', function () {",
+      "before(() => {cy.crudVisit(''); });",
+      "Given('', function () {}, {});});"
+    ],
     "description": "generate full test"
   },
-   "generate test describes its": {
+  "generate test describes its": {
     "scope": "javascript,typescript",
     "prefix": "test_des_its",
-    "body": ["import {describes, its,faker} from '../support/e2e'; ",
-    "describes('', function () {",
-     "its('', function () {}, {});});"],
+    "body": [
+      "import {describes, its,faker} from '../support/e2e'; ",
+      "describes('', function () {",
+      "its('', function () {}, {});});"
+    ],
     "description": "generate full test describes its"
   },
-   "generate test action": {
+  "generate test action": {
     "scope": "javascript,typescript",
     "prefix": "test_action",
-    "body": ["import {faker} from '../support/e2e'; ",
-     "describe('', function()  {",
-    "  before(()=>{cy.visit('')})",
-    " it('', function() { });});"
+    "body": [
+      "import {faker} from '../support/e2e'; ",
+      "describe('', function()  {",
+      "  before(()=>{cy.crudVisit('')})",
+      " it('', function() { });});"
     ],
     "description": "generate full test"
   },
-   "generate test": {
+  "generate test": {
     "scope": "javascript,typescript",
     "prefix": "test_bdd_BR",
-    "body": ["import {Dado, Cenario, faker, Quando,E, Entao} from '../support/e2e'; ",
-     "Cenario('$1', function () {",
-     "before(() => {cy.visit(''); })",
-    "Dado('$2', function () {}, {});",
-    "Quando('$3', function () {}, {});",
-    "E('$4', function () {}, {});",
-    "Entao('$5', function () {}, {});",
-    "});"
+    "body": [
+      "import {Dado, Cenario, faker, Quando,E, Entao} from '../support/e2e'; ",
+      "Cenario('$1', function () {",
+      "before(() => {cy.crudVisit(''); })",
+      "Dado('$2', function () {}, {});",
+      "Quando('$3', function () {}, {});",
+      "E('$4', function () {}, {});",
+      "Entao('$5', function () {}, {});",
+      "});"
     ],
     "description": "generate full test"
-  }
-,
+  },
   "generate elseIf": {
     "scope": "javascript,typescript",
     "prefix": "elseIf",
-    "body": ["cy.elseIf('ex: input[name='name']').type('test', {force: true})", "$2"],
+    "body": [
+      "cy.elseIf('input[name=\"name\"]').type('test', {force: true})",
+      "$2"
+    ],
     "description": "generate elseIf"
+  },
+  "generate If": {
+    "scope": "javascript,typescript",
+    "prefix": "If",
+    "body": [".If('input[name=\"name\"]')", "$2"],
+    "description": "generate If"
   }
-
-
-}`;
+}
+`;
 
 try {
   // Define o caminho da raiz do projeto
@@ -260,7 +267,7 @@ describe("Describe testing", function () {
     cy.crudVisit("https://walkdog.vercel.app/signup"); // using styles
     // cy.visit()  // not using styles
   });
-  it("Testing in page gol", function () {
+  it("Testing in page walkdog", function () {
     cy.action({ attr: selects.fillName }).click();
     // automatic save element in actionStorage.find.element
   });
@@ -298,13 +305,31 @@ describe("Describe testing", function () {
     }).click();
   });
   it("Expect not empty", () => {
-    cy.action({ attr: selects.expectCEP }).invoke("val").should("not.be.empty");
+    cy.action({ attr: selects.expectCEP }, { timeout: 10000 })
+      .invoke("val")
+      .should("not.be.empty");
   });
 
-  it("Test using cy.action with error, wait element max attempts", () => {
+  it("Test mixed functions", () => {
     // cy.action({ attr: selects.expectCEPNotFound })
     //   .invoke("val")
     //   .should("not.be.empty");
+
+    cy.action({ attr: selects.fillName })
+      .click()
+      .If('input[name="name"]')
+      .type("Test");
+
+    cy.action({ attr: selects.fillName })
+      .click()
+      .elseIf('input[name="name"]')
+      .type("Test");
+
+    cy.action({
+      attr: 'name="name"',
+      text: "Entering username",
+      maxAttempts: 5,
+    }).act({ attr: 'name="name"' });
   });
   it("Test using cy.action with error, wait element max attempts 5", () => {
     cy.action({ attr: selects.expectCEPNotFound, maxAttempts: 5 })
@@ -323,6 +348,7 @@ let selects = {
   expectCEP: 'name="addressStreet"',
   expectCEPNotFound: 'name="addressStree"',
 };
+
 `;
 
 if (!fs.existsSync(vscodeFolderPathJSON)) {
@@ -386,6 +412,45 @@ let select = {
 `;
 fs.writeFileSync(exampleElseIf, contentElseIf);
 
+//gol exmaple
+const exampleGolMixedFunctions = path.join(
+  vscodeFolderPathJSON,
+  "cy-mixed-examples.cy.js"
+);
+
+const contentMixed = `
+describe("Tests in page Gol", function () {
+  before(() => {
+    cy.crudVisit("https://www.voegol.com.br/");
+  });
+  it("Gol buy ticket ar lines", function () {
+    cy.action({ attr: 'id="select2-edit-origin-container"' })
+      .click()
+      .act('aria-controls="select2-edit-origin-results"')
+      .type("REC")
+      .act('role="option"')
+      .contains("Recife - REC")
+      .click();
+
+    cy.action({
+      attr: 'id="select2-edit-destiny-container"',
+      text: "select GRU",
+    })
+      .click()
+      .act('aria-controls="select2-edit-destiny-results"')
+      .type("GRU")
+      .act('role="option"')
+      .contains("São Paulo - Guarulhos - GRU")
+      .click();
+    //   .If('[id="onetrust-accept-btn-handler"]')
+    //   .click({ force: true });
+  });
+});
+
+`;
+
+fs.writeFileSync(exampleGolMixedFunctions, contentMixed);
+
 if (!fs.existsSync(vscodeFolderPath)) {
   fs.mkdirSync(vscodeFolderPath);
 }
@@ -398,9 +463,18 @@ const configPath = path.resolve(__dirname, "../../");
 const jsconfigFilePath = path.join(configPath, "cypress.config.js");
 
 const contentLog = `
-// reporter: "cypress-mochawesome-reporter",
+      //reporter: "cypress-mochawesome-reporter",  // insert out e2e
+      require("cypress-mochawesome-reporter/plugin")(on);
+  //       e2e: {
+  //   setupNodeEvents(on, config) {
+  //     //reporter: "cypress-mochawesome-reporter",  // insert out e2e
+  //     require("cypress-mochawesome-reporter/plugin")(on);
 
- require("cypress-mochawesome-reporter/plugin")(on);
+  //     // implement node event listeners here
+  //   },
+  //   testIsolation: false,
+  //   experimentalRunAllSpecs: true,
+  // },
 
 `;
 
@@ -410,10 +484,21 @@ fs.readFile(jsconfigFilePath, "utf8", (err, data) => {
     return;
   }
 
+  const setupNodeEventsMatch = data.match(
+    /setupNodeEvents\(on, config\) {([\s\S]*?)}/
+  );
+  if (setupNodeEventsMatch && setupNodeEventsMatch[1]) {
+    // Verificar se o conteúdo já existe dentro da função
+    if (setupNodeEventsMatch[1].includes(contentLog.trim())) {
+      return;
+    }
+  }
+
   const updateNode = data.replace(
     /(setupNodeEvents\(on, config\) {\s*)/,
     `$1${contentLog}`
   );
+
   fs.writeFile(jsconfigFilePath, updateNode, "utf8", (err) => {
     if (err) {
       console.error(err);

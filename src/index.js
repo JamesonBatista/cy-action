@@ -21,24 +21,29 @@ export function action(
         actionStorage.find = {};
       }
       actionStorage.find.element = attr;
-      return cypress.get(attr, options).wait(1000, { log: false });
+      return cypress.get(attr, options).wait(500, { log: false });
     }
 
     if (attr.startsWith("//")) {
       if (!window && !actionStorage.find) {
         actionStorage.find = {};
       }
-      const el = searchingXpath(attr);
-      actionStorage.find.element = el;
-      return el;
+      return cypress
+        .xpath(attr, options)
+        .wait(500, { log: false })
+        .then((element) => {
+          actionStorage.find.element = element;
+          return element;
+        });
     }
+
     const selector = elementRefactorySelector(attr, regex, doc);
     if (typeof selector === "object") {
       if (!window && !actionStorage.find) {
         actionStorage.find = {};
       }
       actionStorage.find.element = selector;
-      return cypress.get(selector, options).wait(1000, { log: false });
+      return cypress.get(selector, options).wait(500, { log: false });
     }
 
     if (doc.querySelectorAll(selector).length > 0) {
@@ -49,7 +54,56 @@ export function action(
       actionStorage.find.element = doc.querySelectorAll(selector);
       return cypress
         .get(doc.querySelectorAll(selector), options)
-        .wait(1000, { log: false });
+        .wait(500, { log: false });
+    } else {
+      return searching(selector, options, maxAttempts);
+    }
+  });
+}
+export function act(attr = "", maxAttempts = 3, options = {}) {
+  let regex = /^[!@#$%¨&*()_+{}[\]:;,.?~\\\/|]/.test(attr);
+  return cy.document({ log: false }).then((doc) => {
+    let cypress = cy;
+
+    if (typeof attr === "object") {
+      if (!window && !actionStorage.find) {
+        actionStorage.find = {};
+      }
+      actionStorage.find.element = attr;
+      return cypress.get(attr, options).wait(500, { log: false });
+    }
+
+    if (attr.startsWith("//")) {
+      if (!window && !actionStorage.find) {
+        actionStorage.find = {};
+      }
+      return cypress
+        .xpath(attr, options)
+        .wait(500, { log: false })
+        .then((element) => {
+          actionStorage.find.element = element;
+          return element;
+        });
+    }
+
+    const selector = elementRefactorySelector(attr, regex, doc);
+    if (typeof selector === "object") {
+      if (!window && !actionStorage.find) {
+        actionStorage.find = {};
+      }
+      actionStorage.find.element = selector;
+      return cypress.get(selector, options).wait(500, { log: false });
+    }
+
+    if (doc.querySelectorAll(selector).length > 0) {
+      if (!window && !actionStorage.find) {
+        actionStorage.find = {};
+      }
+
+      actionStorage.find.element = doc.querySelectorAll(selector);
+      return cypress
+        .get(doc.querySelectorAll(selector), options)
+        .wait(500, { log: false });
     } else {
       return searching(selector, options, maxAttempts);
     }
@@ -58,7 +112,7 @@ export function action(
 function elseIf(num, attr, elements) {
   if (num > 0) {
     const log = {
-      name: "elseIf",
+      name: "if",
       message: `✅  exist:  ${attr} `,
       consoleProps: () => {
         return {
@@ -71,7 +125,7 @@ function elseIf(num, attr, elements) {
     Cypress.log(log);
   } else {
     const log = {
-      name: "no-elseIf",
+      name: "else",
       message: `🔴  skipped:  ${attr} not found`,
       consoleProps: () => {
         return {
@@ -87,107 +141,30 @@ function elseIf(num, attr, elements) {
 
 function searching(attr, options, maxAttempts) {
   const baseWaitTime = 3000; // 3000ms ou 3 segundos
+
   const attempts = (attempt = 1) => {
-    cy.document({ log: false }).then((doc) => {
+    return cy.document({ log: false }).then((doc) => {
       const waitTime = attempt * baseWaitTime;
 
-      cy.log(`🔍 searching *${attr}*, ${attempt}ª tentativa...`)
+      return cy
+        .log(`🔍 searching *${attr}*, ${attempt}ª tentativa...`)
         .wait(waitTime)
         .then(() => {
           let selector = doc.querySelectorAll(attr);
           if (selector.length > 0) {
-            return cy.get(selector, options).wait(1000, { log: false });
-          } else {
-            if (attempt === maxAttempts) {
-              return cy.get(selector, options).wait(1000, { log: false });
-            }
+            return cy.get(selector, options).wait(500, { log: false });
+          } else if (attempt < maxAttempts) {
+            return attempts(attempt + 1);
           }
 
-          if (attempt < maxAttempts) {
-            attempts(attempt + 1);
-          }
+          return cy.wrap(null, { log: false });
         });
     });
   };
-  attempts();
+
+  return attempts(); // Inicia a primeira tentativa
 }
-const searchingXpath = (xpathSelector) => {
-  let nodes = [];
 
-  cy.then(() => {
-    const log = {
-      name: "xpath",
-      message: xpathSelector,
-      consoleProps: () => {
-        return {
-          XPath: xpathSelector,
-          "Results length": nodes.length,
-          Result: nodes[0],
-        };
-      },
-    };
-
-    const getValue = () => {
-      return new Cypress.Promise((resolve, reject) => {
-        let contextNode = cy.state("window").document;
-
-        let iterator = document.evaluate(
-          xpathSelector,
-          contextNode,
-          null,
-          XPathResult.ORDERED_NODE_ITERATOR_TYPE,
-          null
-        );
-
-        let node = iterator.iterateNext();
-        while (node) {
-          nodes.push(node);
-          node = iterator.iterateNext();
-        }
-
-        resolve(Cypress.$(nodes));
-      });
-    };
-
-    const executeSearch = () => {
-      return getValue().then((value) => {
-        Cypress.log(log);
-
-        if (value && value.length > 0) {
-          log.$el = value;
-          return value;
-        } else {
-          return waitAttempts(xpathSelector, 1);
-        }
-      });
-    };
-
-    function waitAttempts(xpathSelector, attempt) {
-      const maxAttempts = 6;
-      const waitTimes = [3000, 5000, 10000, 20000, 30000, 60000];
-
-      if (attempt <= maxAttempts) {
-        return cy
-          .log(
-            `🔍 searching *${xpathSelector}* in page, ${attempt} tentative...`
-          )
-          .wait(waitTimes[attempt - 1])
-          .then(() => {
-            return getValue().then((value) => {
-              if (value && value.length > 0) {
-                log.$el = value;
-                return value;
-              } else if (attempt < maxAttempts) {
-                return waitAttempts(xpathSelector, attempt + 1);
-              }
-            });
-          });
-      }
-    }
-
-    return executeSearch();
-  });
-};
 const searchingXpathifElse = (xpathSelector) => {
   return cy.document({ log: false }).then((doc) => {
     return new Cypress.Promise((resolve) => {
@@ -258,6 +235,9 @@ function elementRefactorySelector(attr, regex, doc) {
 Cypress.Commands.add("action", (options, getOptions) => {
   return action(options, getOptions);
 });
+Cypress.Commands.add("act", (options, getOptions) => {
+  return act(options, getOptions);
+});
 Cypress.Commands.add(
   "attributes",
   { prevSubject: true },
@@ -273,6 +253,52 @@ Cypress.Commands.add(
   }
 );
 
+Cypress.Commands.add("If", (selector, options = {}) => {
+  const { text = null, error = false } = options;
+  let cyaction = cy;
+  if (text) {
+    cyaction = cy.step(text);
+  }
+  return cy.window({ log: false }).then((win) => {
+    let elementExists = win.document.querySelector(selector);
+
+    if (!elementExists) {
+      if (error) {
+        return cyaction.get(selector);
+      }
+
+      if (selector.startsWith("#") && selector.includes("select")) {
+        const newSelect = document.createElement("select");
+        newSelect.style.display = "none";
+        win.document.body.appendChild(newSelect);
+        elementExists = newSelect;
+        let notFind = cyaction;
+        notFind.then(() => {
+          elseIf(0, selector, newSelect);
+        });
+        return notFind.wrap(newSelect, { log: false });
+      } else {
+        const matches = selector.match(/(\w+)\[/);
+        const elementType = matches && matches[1] ? matches[1] : "div";
+        const newElement = document.createElement(elementType);
+        newElement.style.display = "none";
+        win.document.body.appendChild(newElement);
+        elementExists = newElement;
+        let notFind = cyaction;
+        notFind.then(() => {
+          elseIf(0, selector, elementExists);
+        });
+        return notFind.wrap(newElement, { log: false });
+      }
+    }
+
+    let findOK = cyaction;
+    findOK.then(() => {
+      elseIf(1, selector, elementExists);
+    });
+    return findOK.wrap(elementExists, { log: false });
+  });
+});
 Cypress.Commands.add("elseIf", (selector, options = {}) => {
   const { text = null, error = false } = options;
   let cyaction = cy;
@@ -319,7 +345,6 @@ Cypress.Commands.add("elseIf", (selector, options = {}) => {
     return findOK.wrap(elementExists, { log: false });
   });
 });
-
 Cypress.Commands.add("value", { prevSubject: true }, (subject, value) => {
   const tagName = subject.prop("tagName").toLowerCase();
 
@@ -339,8 +364,8 @@ Cypress.Commands.add(
     url = Cypress.env("baseUrl") || Cypress.env("url") || Cypress.env("visit"),
     options = {}
   ) => {
+    applyStyles();
     cy.then(() => {
-      applyStyles();
       if (!startStyle) {
         function executeCodeEvery2Seconds() {
           const app = window.top;
@@ -351,7 +376,7 @@ Cypress.Commands.add(
             ".reporter .command-state-passed:not(.command-is-event, .command-type-system) .command-method span"
           );
           const elseIfError = app.document.querySelectorAll(
-            "#unified-reporter > div > div > div.wrap > ul > li > div > div.collapsible-content.runnables-region > ul > li > div > div.collapsible-content.runnable-instruments > div > ul > li > div > div.collapsible-content.attempt-content > div > div > ul > li > div > div.collapsible-content > ul > li.command.command-name-no-elseIf > div > span > div > span.command-info > span.command-method > span"
+            "#unified-reporter > div > div > div.wrap > ul > li > div > div.collapsible-content.runnables-region > ul > li > div > div.collapsible-content.runnable-instruments > div > ul > li > div > div.collapsible-content.attempt-content > div > div > ul > li > div > div.collapsible-content > ul > li.command.command-name-else > div > span > div > span.command-info > span.command-method > span"
           );
 
           commands.forEach((span) => {
@@ -392,7 +417,7 @@ Cypress.Commands.add(
           });
 
           commandselseIf.forEach((span) => {
-            if (span.textContent.includes("elseIf")) {
+            if (span.textContent.includes("if")) {
               span.style.backgroundColor = "#0080005c";
               span.style.padding = "3px";
               span.style.borderRadius = "5px";
@@ -413,8 +438,8 @@ Cypress.Commands.add(
         }
 
         setInterval(executeCodeEvery2Seconds, 200);
-        return cy.visit(url, options);
       }
     });
+    cy.visit(url, options);
   }
 );

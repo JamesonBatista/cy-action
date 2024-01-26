@@ -3,30 +3,77 @@
 declare namespace Cypress {
   interface Chainable {
     /**
-     * Custom command to perform various actions based on provided parameters.
-     * @param options Object with options for the action.
-     * @param test Function to execute with the found element.
-     * @param getOptions Cypress get command options, like timeout.
-     * @example
-     * cy.action({ attr: 'my-selector', text: 'Action description', ifExist: true, maxAttempts: 6 },
-     *           (el) => el.click(),
-     *           { timeout: 10000 });
+     * Custom action function
+     * @param params Parameters for the action
+     * @param options Cypress command options
+     *
+     * Usage Examples:
+     *
+     * // Example 1: Using Only `attr`
+     * cy.action({ attr: '#botaoLogin' });
+     *
+     * // Example 2: Using `attr` and `text`
+     * cy.action({ attr: '.classeElemento', text: 'Clicking on the element' });
+     *
+     * // Example 3: Using All Properties of `params`
+     * cy.action({ attr: 'name="usuario"', text: 'Entering username', maxAttempts: 5 });
+     *
+     * // Example 4: Using Cypress `options`
+     * cy.action({ attr: 'type="password"' }, { timeout: 10000, log: false });
      */
     action(
-      options: {
-        attr: string;
-        text: string | null;
-        ifExist: boolean;
-        maxAttempts: number;
+      params: {
+        attr?: string | object;
+        text?: string | null;
+        maxAttempts?: number;
       },
-      test: (element: Cypress.Chainable) => void,
-      getOptions?: Partial<
+      options?: Partial<
         Cypress.Loggable &
           Cypress.Timeoutable &
           Cypress.Withinable &
           Cypress.Shadow
       >
-    ): Chainable<any>;
+    ): Chainable<JQuery<HTMLElement>>;
+
+    /**
+     * Custom action function
+     * @param params Parameters for the action
+     * @param options Cypress command options
+     *
+     * Usage Examples:
+     *
+     * // Example 1: Using Only `attr`
+     * cy.action({ attr: '#botaoLogin' });
+     *
+     * // Example 2: Using `attr` and `text`
+     * cy.act('.classeElemento');
+     *
+     * // Example 3: Using All Properties of `params`
+     * cy.action({ attr: 'name="usuario"', text: 'Entering username', maxAttempts: 5 })
+     * .act('name="usuario"', maxAttempts: 5 });
+     *
+     * // Example 4: Using Cypress `options`
+     * cy.action({ attr: 'type="password"' }, { timeout: 10000, log: false });
+     *cy.action({ attr: selects.fillName })
+      .click()
+      .elseIf('input[name="name"]')
+      .type("Test");
+      *
+      *cy.action({ attr: selects.fillName })
+      .click()
+      .If('input[name="name"]')
+      .type("Test");
+     */
+    act(
+      attr?: string | object,
+      maxAttempts?: number,
+      options?: Partial<
+        Cypress.Loggable &
+          Cypress.Timeoutable &
+          Cypress.Withinable &
+          Cypress.Shadow
+      >
+    ): Chainable<JQuery<HTMLElement>>;
 
     attributes(attributes: {
       [key: string]: string;
@@ -52,6 +99,25 @@ declare namespace Cypress {
       options?: { text?: string; error?: boolean }
     ): Chainable<JQuery<HTMLElement>>;
 
+    /**
+     * Custom command to perform actions based on a selector.
+     * If the element exists, checks for a specific option in a select element.
+     * Otherwise, creates a hidden element of the specified type.
+     * @param attr The CSS selector or element attribute.
+     * @param optionValue The value of the option to check or add.
+     * @example
+     * If('select[name="example"]', 'optionValue');
+     */
+    /**
+     * Custom command to check if an element exists based on a selector.
+     * If the element does not exist, a new hidden element of the inferred type is created.
+     * @param selector The CSS selector to query the element.
+     * @example If('input[name="name"]')
+     */
+    If(
+      selector: string,
+      options?: { text?: string; error?: boolean }
+    ): Chainable<JQuery<HTMLElement>>;
     /**
      * Custom command to add a value to a select or button element.
      * It is chainable after the elseIf command.
