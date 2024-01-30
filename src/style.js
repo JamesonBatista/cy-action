@@ -94,6 +94,14 @@ border-top: 1px solid #ffffff08;
       ${bddFailed} > div > div > div > div.collapsible-header-inner{
         background-color: #ff000029;
       }
+
+      .bg-gray-100 {
+    background-color: #1b1e2e;
+  }
+    .p-\\[16px\\] {
+    padding: 16px;
+    background: #1b1e2e;
+  }
     `;
 
     style.setAttribute("data-hide-command-log-cssSelector", "");

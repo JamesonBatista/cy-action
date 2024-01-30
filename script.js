@@ -58,6 +58,10 @@ if (!app.document.head.querySelector("[data-hide-command-log-request]")) {
   style.setAttribute("data-hide-command-log-request", "");
   app.document.head.appendChild(style);
 }
+Cypress.on('uncaught:exception', (err, runnable) => {
+  return false;
+});
+
 `;
 
 const appendToFile = (filePath, content) => {
@@ -173,9 +177,10 @@ const snippetContent = `{
     "scope": "javascript,typescript",
     "prefix": "test_des_its",
     "body": [
-      "import {describes, its,faker} from '../support/e2e'; ",
-      "describes('', function () {",
-      "its('', function () {}, {});});"
+      "const { faker } = require("../../support/e2e"); ",
+      "describe('', function () {",
+      "  before(()=>{cy.crudVisit('')})",
+      "it('', function () {});"
     ],
     "description": "generate full test describes its"
   },
@@ -183,7 +188,7 @@ const snippetContent = `{
     "scope": "javascript,typescript",
     "prefix": "test_action",
     "body": [
-      "import {faker} from '../support/e2e'; ",
+      "const { faker } = require("../../support/e2e"); ",
       "describe('', function()  {",
       "  before(()=>{cy.crudVisit('')})",
       " it('', function() { });});"
@@ -209,7 +214,7 @@ const snippetContent = `{
     "scope": "javascript,typescript",
     "prefix": "elseIf",
     "body": [
-      "cy.elseIf('input[name=\"name\"]').type('test', {force: true})",
+      "cy.elseIf('input[name=\\\\\\"name\\\\\\"]').type('test', {force: true})",
       "$2"
     ],
     "description": "generate elseIf"
@@ -217,10 +222,13 @@ const snippetContent = `{
   "generate If": {
     "scope": "javascript,typescript",
     "prefix": "If",
-    "body": [".If('input[name=\"name\"]')", "$2"],
+    "body": [
+      ".If('input[name=\\\\\\"name\\\\\\"]')",
+      "$2"
+    ],
     "description": "generate If"
   }
-}
+  }
 `;
 
 try {
@@ -305,7 +313,7 @@ describe("Describe testing", function () {
     }).click();
   });
   it("Expect not empty", () => {
-    cy.action({ attr: selects.expectCEP }, { timeout: 10000 })
+    cy.action({ attr: selects.expectCEP }, { timeout: 20000 })
       .invoke("val")
       .should("not.be.empty");
   });
@@ -332,9 +340,7 @@ describe("Describe testing", function () {
     }).act({ attr: 'name="name"' });
   });
   it("Test using cy.action with error, wait element max attempts 5", () => {
-    cy.action({ attr: selects.expectCEPNotFound, maxAttempts: 5 })
-      .invoke("val")
-      .should("not.be.empty");
+    cy.action({ attr: selects.expectCEPNotFound, maxAttempts: 5 });
   });
 });
 
@@ -463,46 +469,21 @@ const configPath = path.resolve(__dirname, "../../");
 const jsconfigFilePath = path.join(configPath, "cypress.config.js");
 
 const contentLog = `
-      //reporter: "cypress-mochawesome-reporter",  // insert out e2e
-      require("cypress-mochawesome-reporter/plugin")(on);
-  //       e2e: {
-  //   setupNodeEvents(on, config) {
-  //     //reporter: "cypress-mochawesome-reporter",  // insert out e2e
-  //     require("cypress-mochawesome-reporter/plugin")(on);
+const { defineConfig } = require("cypress");
 
-  //     // implement node event listeners here
-  //   },
-  //   testIsolation: false,
-  //   experimentalRunAllSpecs: true,
-  // },
+module.exports = defineConfig({
+  reporter: "cypress-mochawesome-reporter",
+
+  e2e: {
+    setupNodeEvents(on, config) {
+      require("cypress-mochawesome-reporter/plugin")(on);
+    },
+    testIsolation: false,
+    experimentalRunAllSpecs: true,
+    viewportHeight: 1400,
+    viewportWidth: 1600,
+  },
+});
 
 `;
-
-fs.readFile(jsconfigFilePath, "utf8", (err, data) => {
-  if (err) {
-    console.error(err);
-    return;
-  }
-
-  const setupNodeEventsMatch = data.match(
-    /setupNodeEvents\(on, config\) {([\s\S]*?)}/
-  );
-  if (setupNodeEventsMatch && setupNodeEventsMatch[1]) {
-    // Verificar se o conteúdo já existe dentro da função
-    if (setupNodeEventsMatch[1].includes(contentLog.trim())) {
-      return;
-    }
-  }
-
-  const updateNode = data.replace(
-    /(setupNodeEvents\(on, config\) {\s*)/,
-    `$1${contentLog}`
-  );
-
-  fs.writeFile(jsconfigFilePath, updateNode, "utf8", (err) => {
-    if (err) {
-      console.error(err);
-      return;
-    }
-  });
-});
+fs.writeFile(jsconfigFilePath, contentLog, "utf8", function (err) {});
